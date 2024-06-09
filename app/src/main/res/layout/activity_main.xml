@@ -37,7 +37,7 @@
             android:layout_below="@id/video_title"
             android:layout_alignParentEnd="true"
             android:layout_marginTop="-1dp"
-            android:layout_marginEnd="9dp"
+            android:layout_marginEnd="18dp"
             android:padding="4dp"
             android:text="Views: 0"
             android:textSize="14sp" />
@@ -71,14 +71,25 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/video_title"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="34dp"
-            android:layout_marginEnd="52dp"
+            android:layout_marginTop="33dp"
+            android:layout_marginEnd="51dp"
             android:padding="4dp"
             android:text="כאן חדשות"
             android:textSize="14sp" />
 
-    </RelativeLayout>
+        <TextView
+            android:id="@+id/likes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/video_title"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="34dp"
+            android:layout_marginEnd="129dp"
+            android:padding="4dp"
+            android:text="120 לייקים"
+            android:textSize="14sp" />
 
+    </RelativeLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -89,14 +100,16 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="end">
+            android:gravity="end"
+            android:orientation="horizontal">
 
-            <Button
+            <ImageButton
                 android:id="@+id/like_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Like" />
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Like Button"
+                android:src="@drawable/basic_l" />
 
             <Button
                 android:id="@+id/comment_button"
@@ -104,12 +117,13 @@
                 android:layout_height="wrap_content"
                 android:text="Comment" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/share_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Share" />
-
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Share Button"
+                android:src="@drawable/share" /> <!-- Replace with your share icon -->
         </LinearLayout>
 
         <TextView

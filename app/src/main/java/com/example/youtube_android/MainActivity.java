@@ -1,10 +1,15 @@
+
+
 package com.example.youtube_android;
+
+import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
@@ -20,21 +25,24 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private VideoView videoView;
-    private Button likeButton;
+    private ImageButton likeButton;
     private EditText commentEditText;
     private Button commentButton;
     private RecyclerView commentsRecyclerView;
     private CommentsAdapter commentsAdapter;
     private List<String> commentsList;
     private int likeCount = 0;
+    private boolean isLiked = false;
 
     private TextView videoTitle;
     private TextView videoViews;
     private TextView videoTime;
     private TextView videoUsername;
+    private TextView likes;
     private TextView videoUrlText;
     private ImageView userIcon;
 
+    @SuppressLint("WrongViewCast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,10 +58,10 @@ public class MainActivity extends AppCompatActivity {
         videoTime = findViewById(R.id.video_time);
         videoUsername = findViewById(R.id.video_username);
         userIcon = findViewById(R.id.user_icon);
-
-
+        likes= findViewById(R.id.likes);
         Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.v3);
         videoView.setVideoURI(uri);
+
         MediaController mediaController = new MediaController(this);
         videoView.setMediaController(mediaController);
         mediaController.setAnchorView(videoView);
@@ -66,10 +74,22 @@ public class MainActivity extends AppCompatActivity {
         likeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                likeCount++;
-                likeButton.setText("Like (" + likeCount + ")");
+                if (!isLiked) {
+                    likeCount++;
+                    isLiked = true;
+                    likeButton.setImageResource(R.drawable.liked); // Change to filled like icon
+                } else {
+                    likeCount--;
+                    isLiked = false;
+                    likeButton.setImageResource(R.drawable.basic_l); // Change to regular like icon
+                }
+                likeButton.setContentDescription("" + likeCount + " likes");
+                likes.setText("" + likeCount + " לייקים"); // Update the displayed like count
             }
         });
+
+
+
 
         commentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -111,7 +131,18 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case "video_url":
                         videoUrl = reader.nextString();
-                        videoUrlText.setText(videoUrl);  // Set the video URL text
+                        break;
+                    case "likeCount":
+                        likeCount = reader.nextInt();
+                        likes.setText("" + likeCount + " לייקים"); // Update the displayed like count
+                        break;
+                    case "comments":
+                        reader.beginArray();
+                        while (reader.hasNext()) {
+                            commentsList.add(reader.nextString());
+                        }
+                        reader.endArray();
+                        commentsAdapter.notifyDataSetChanged();
                         break;
                     default:
                         reader.skipValue();
@@ -121,14 +152,7 @@ public class MainActivity extends AppCompatActivity {
             reader.endObject();
             reader.close();
 
-//            if (videoUrl != null) {
-//                Uri uri = Uri.parse(videoUrl);
-//                videoView.setVideoURI(uri);
-//                videoView.start();
-//            }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-}
+    }}
