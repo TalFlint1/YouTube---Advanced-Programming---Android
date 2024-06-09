@@ -47,7 +47,10 @@ public class RegisterActivity extends AppCompatActivity {
 
                     // Example: Redirect to a welcome screen or the main activity after registration
                     startActivity(new Intent(RegisterActivity.this, MainActivity.class));
-                    finish(); // Finish the current activity to prevent going back to registration page
+                    finish(); // Finish the current activity to prevent going back to the registration page
+                } else {
+                    // Display error message if validation fails
+                    Toast.makeText(RegisterActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -55,10 +58,33 @@ public class RegisterActivity extends AppCompatActivity {
 
     // Example method for validating input fields
     private boolean validateFields(String username, String password, String confirmPassword, String name) {
-        // Perform validation logic here (e.g., checking for empty fields, password match, etc.)
-        // For simplicity, return true if all fields are non-empty
-        return !username.isEmpty() && !password.isEmpty() && !confirmPassword.isEmpty() && !name.isEmpty();
+        boolean isValid = true;
+
+        // Check if any field is empty and display error messages accordingly
+        if (username.isEmpty()) {
+            usernameEditText.setError("Username is required");
+            isValid = false;
+        }
+        if (password.length() < 8 || password.length() > 16 || !password.matches("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!@#$%^&*]{8,16}$")) {
+            passwordEditText.setError("Password must be between 8-16 characters and combine letters and numbers");
+            isValid = false;
+        }
+        if (confirmPassword.isEmpty()) {
+            confirmPasswordEditText.setError("Please confirm your password");
+            isValid = false;
+        }
+        if (name.isEmpty()) {
+            nameEditText.setError("Name is required");
+            isValid = false;
+        }
+        // Check if passwords match
+        if (!password.equals(confirmPassword)) {
+            confirmPasswordEditText.setError("Passwords do not match");
+            isValid = false;
+        }
+
+        return isValid;
     }
+
+
 }
-
-
