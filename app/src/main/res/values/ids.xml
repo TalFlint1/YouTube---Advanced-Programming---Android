@@ -4,4 +4,6 @@
     <item name="titleTextView" type="id" />
     <item name="videoView" type="id" />
     <item name="idVideoView" type="id" />
+    <item name="comments_recycler_view" type="id" />
+    <item name="comment_button" type="id" />
 </resources>
