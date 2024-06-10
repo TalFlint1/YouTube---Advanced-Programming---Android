@@ -5,5 +5,6 @@
   "views": "views:3",
   "video_url": "http://www.example.com/path/to/your/video.mp4",
   "likeCount": 5,
-  "comments": ["Great video!","Great video!","Great video!"]
+  "comments": ["Great video!","wow"]
+
 }

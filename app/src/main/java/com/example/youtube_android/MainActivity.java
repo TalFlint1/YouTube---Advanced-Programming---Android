@@ -1,5 +1,3 @@
-
-
 package com.example.youtube_android;
 
 import android.annotation.SuppressLint;
@@ -14,9 +12,11 @@ import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -59,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         videoUsername = findViewById(R.id.video_username);
         userIcon = findViewById(R.id.user_icon);
         likes= findViewById(R.id.likes);
+
         Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.v3);
         videoView.setVideoURI(uri);
 
@@ -87,9 +88,6 @@ public class MainActivity extends AppCompatActivity {
                 likes.setText("" + likeCount + " לייקים"); // Update the displayed like count
             }
         });
-
-
-
 
         commentButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,4 +153,5 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }}
+    }
+}
