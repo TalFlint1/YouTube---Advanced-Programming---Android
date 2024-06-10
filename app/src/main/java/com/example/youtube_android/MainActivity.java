@@ -27,7 +27,9 @@ public class MainActivity extends AppCompatActivity {
     private VideoView videoView;
     private ImageButton likeButton;
     private EditText commentEditText;
-    private Button commentButton;
+    private ImageButton commentButton;
+
+   // private Button commentButton;
     private RecyclerView commentsRecyclerView;
     private CommentsAdapter commentsAdapter;
     private List<String> commentsList;
