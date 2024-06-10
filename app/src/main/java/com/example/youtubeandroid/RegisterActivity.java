@@ -1,33 +1,63 @@
 package com.example.youtubeandroid;
+
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import java.util.ArrayList;
+import androidx.core.content.FileProvider;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText usernameEditText, passwordEditText, confirmPasswordEditText, nameEditText;
-    private Button registerButton;
+    private static final int REQUEST_IMAGE_CAPTURE = 1;
+    private static final int REQUEST_PICK_IMAGE = 2;
 
-    private ArrayList<User> users;
+    private EditText usernameEditText, passwordEditText, confirmPasswordEditText, nameEditText;
+    private Button registerButton, selectPictureButton;
+    private ImageView imagePreview;
+    private String currentPhotoPath;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        // Find the close button
+        ImageButton closeButton = findViewById(R.id.closeButton);
+
+        // Set click listener for the close button
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate back to the main page (MainActivity)
+                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                finish(); // Finish the current activity to prevent going back to the registration page
+            }
+        });
+
         usernameEditText = findViewById(R.id.username);
         passwordEditText = findViewById(R.id.password);
         confirmPasswordEditText = findViewById(R.id.confirmPassword);
         nameEditText = findViewById(R.id.name);
         registerButton = findViewById(R.id.registerButton);
-
-        users = new ArrayList<>();
+        selectPictureButton = findViewById(R.id.selectPictureButton);
+        imagePreview = findViewById(R.id.imagePreview);
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -38,22 +68,109 @@ public class RegisterActivity extends AppCompatActivity {
                 String name = nameEditText.getText().toString();
 
                 if (validateFields(username, password, confirmPassword, name)) {
-                    // If all fields are valid, create a new user and add to the list
-                    User newUser = new User(username, password, name);
-                    users.add(newUser);
-
-                    // Optionally, you can save the user data or perform further actions here
+                    // Save the user data using SharedPreferences
+                    saveUserData(username, password, name);
                     Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+
+                    // Verify that the data is saved
+                    verifyUserData();
 
                     // Example: Redirect to a welcome screen or the main activity after registration
                     startActivity(new Intent(RegisterActivity.this, MainActivity.class));
                     finish(); // Finish the current activity to prevent going back to the registration page
                 } else {
                     // Display error message if validation fails
-                    Toast.makeText(RegisterActivity.this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Please fill in all fields correctly", Toast.LENGTH_SHORT).show();
                 }
             }
         });
+
+        selectPictureButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPictureDialog();
+            }
+        });
+    }
+
+    private void showPictureDialog() {
+        // Display options to either take a photo or choose from gallery
+        final CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(RegisterActivity.this);
+        builder.setTitle("Select Option");
+        builder.setItems(options, (dialog, item) -> {
+            if (options[item].equals("Take Photo")) {
+                dispatchTakePictureIntent();
+            } else if (options[item].equals("Choose from Gallery")) {
+                dispatchPickPictureIntent();
+            } else if (options[item].equals("Cancel")) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+                ex.printStackTrace();
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(this,
+                        "com.example.youtubeandroid.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+
+    private void dispatchPickPictureIntent() {
+        Intent pickPictureIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(pickPictureIntent, REQUEST_PICK_IMAGE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_IMAGE_CAPTURE) {
+                // Show the image from the camera
+                File file = new File(currentPhotoPath);
+                imagePreview.setImageURI(Uri.fromFile(file));
+                imagePreview.setVisibility(View.VISIBLE);
+            } else if (requestCode == REQUEST_PICK_IMAGE && data != null) {
+                // Show the image from the gallery
+                Uri selectedImage = data.getData();
+                imagePreview.setImageURI(selectedImage);
+                imagePreview.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getExternalFilesDir(null);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     // Example method for validating input fields
@@ -86,5 +203,25 @@ public class RegisterActivity extends AppCompatActivity {
         return isValid;
     }
 
+    // Method to save user data using SharedPreferences
+    private void saveUserData(String username, String password, String name) {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
 
+        editor.putString("username", username);
+        editor.putString("password", password);
+        editor.putString("name", name);
+        editor.apply();
+    }
+
+    // Method to retrieve user data from SharedPreferences
+    private void verifyUserData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String username = sharedPreferences.getString("username", "");
+        String password = sharedPreferences.getString("password", "");
+        String name = sharedPreferences.getString("name", "");
+
+        // Display the retrieved data as a Toast message for verification
+        Toast.makeText(this, "Saved Data - Username: " + username + ", Name: " + name, Toast.LENGTH_LONG).show();
+    }
 }
