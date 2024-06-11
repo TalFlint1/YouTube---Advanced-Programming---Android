@@ -88,10 +88,8 @@
                     android:textSize="12sp" />
 
                 <RelativeLayout
-                    android:id="@+id/passwordContainer"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="15dp">
+                    android:layout_height="wrap_content">
 
                     <EditText
                         android:id="@+id/password"
@@ -101,31 +99,26 @@
                         android:hint="Password"
                         android:inputType="textPassword" />
 
-                    <TextView
-                        android:id="@+id/tooltipIcon"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
+                    <ImageView
+                        android:id="@+id/passwordHelpIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:gravity="center"
-                        android:textSize="12sp"
-                        android:textStyle="bold"
-                        android:textColor="#333"
                         android:layout_marginEnd="8dp"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
-                        android:padding="8dp"
-                        android:clickable="true"
-                        android:contentDescription="Information Icon for Tooltips" />
+                        android:src="@android:drawable/ic_menu_help"
+                        android:contentDescription="Password Help" />
 
                     <TextView
-                        android:id="@+id/tooltipText"
+                        android:id="@+id/passwordTooltip"
                         android:layout_width="250dp"
                         android:layout_height="wrap_content"
                         android:padding="10dp"
+                        android:background="#FFFFFF"
+                        android:elevation="4dp"
                         android:visibility="gone"
                         android:text="Password must be between 8-16 characters and combine a-Z letters and numbers. It's also possible to use the characters '!@#$%^&amp;*'."
-                        android:textSize="12sp"
+                        android:textSize="14sp"
                         android:layout_below="@id/password"
                         android:layout_marginTop="5dp"
                         android:gravity="center" />

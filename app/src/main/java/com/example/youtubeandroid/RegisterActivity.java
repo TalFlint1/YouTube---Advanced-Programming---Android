@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -32,6 +33,8 @@ public class RegisterActivity extends AppCompatActivity {
     private Button registerButton, selectPictureButton;
     private ImageView imagePreview;
     private String currentPhotoPath;
+    private ImageView passwordHelpIcon;
+    private TextView passwordTooltip;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,6 +61,21 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.registerButton);
         selectPictureButton = findViewById(R.id.selectPictureButton);
         imagePreview = findViewById(R.id.imagePreview);
+        passwordHelpIcon = findViewById(R.id.passwordHelpIcon);
+        passwordTooltip = findViewById(R.id.passwordTooltip);
+
+        // Set click listener for the password help icon
+        passwordHelpIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Toggle the visibility of the tooltip
+                if (passwordTooltip.getVisibility() == View.GONE) {
+                    passwordTooltip.setVisibility(View.VISIBLE);
+                } else {
+                    passwordTooltip.setVisibility(View.GONE);
+                }
+            }
+        });
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
