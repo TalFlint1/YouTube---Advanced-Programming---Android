@@ -1,8 +1,12 @@
 package com.example.youtubeandroid;
 
+import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -14,25 +18,22 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.FileProvider;
-
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class RegisterActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_PICK_IMAGE = 2;
+    private static final int CAMERA_PERMISSION_CODE = 101;
+    private static final int GALLERY_PERMISSION_CODE = 102;
 
     private EditText usernameEditText, passwordEditText, confirmPasswordEditText, nameEditText;
     private Button registerButton, selectPictureButton;
     private ImageView imagePreview;
-    private String currentPhotoPath;
     private ImageView passwordHelpIcon;
     private TextView passwordTooltip;
 
@@ -106,7 +107,12 @@ public class RegisterActivity extends AppCompatActivity {
         selectPictureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showPictureDialog();
+                // Check for permission to access the gallery
+                if (ContextCompat.checkSelfPermission(RegisterActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(RegisterActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_CODE);
+                } else {
+                    showPictureDialog();
+                }
             }
         });
     }
@@ -119,7 +125,12 @@ public class RegisterActivity extends AppCompatActivity {
         builder.setTitle("Select Option");
         builder.setItems(options, (dialog, item) -> {
             if (options[item].equals("Take Photo")) {
-                dispatchTakePictureIntent();
+                // Check for camera permission
+                if (ContextCompat.checkSelfPermission(RegisterActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(RegisterActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+                } else {
+                    dispatchTakePictureIntent();
+                }
             } else if (options[item].equals("Choose from Gallery")) {
                 dispatchPickPictureIntent();
             } else if (options[item].equals("Cancel")) {
@@ -129,28 +140,16 @@ public class RegisterActivity extends AppCompatActivity {
         builder.show();
     }
 
+
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there's a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-                ex.printStackTrace();
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        "com.example.youtubeandroid.fileprovider",
-                        photoFile);
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-            }
+        try {
+            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+        } catch (ActivityNotFoundException e) {
+            // display error state to the user
         }
     }
+
 
     private void dispatchPickPictureIntent() {
         Intent pickPictureIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -163,8 +162,9 @@ public class RegisterActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             if (requestCode == REQUEST_IMAGE_CAPTURE) {
                 // Show the image from the camera
-                File file = new File(currentPhotoPath);
-                imagePreview.setImageURI(Uri.fromFile(file));
+                Bundle extras = data.getExtras();
+                Bitmap imageBitmap = (Bitmap) extras.get("data");
+                imagePreview.setImageBitmap(imageBitmap);
                 imagePreview.setVisibility(View.VISIBLE);
             } else if (requestCode == REQUEST_PICK_IMAGE && data != null) {
                 // Show the image from the gallery
@@ -173,22 +173,6 @@ public class RegisterActivity extends AppCompatActivity {
                 imagePreview.setVisibility(View.VISIBLE);
             }
         }
-    }
-
-    private File createImageFile() throws IOException {
-        // Create an image file name
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(null);
-        File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
-        );
-
-        // Save a file: path for use with ACTION_VIEW intents
-        currentPhotoPath = image.getAbsolutePath();
-        return image;
     }
 
     // Example method for validating input fields
@@ -241,5 +225,23 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Display the retrieved data as a Toast message for verification
         Toast.makeText(this, "Saved Data - Username: " + username + ", Name: " + name, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                dispatchTakePictureIntent();
+            } else {
+                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == GALLERY_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                showPictureDialog();
+            } else {
+                Toast.makeText(this, "Gallery permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
