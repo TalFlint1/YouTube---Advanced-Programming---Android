@@ -88,18 +88,11 @@ public class RegisterActivity extends AppCompatActivity {
 
                 if (validateFields(username, password, confirmPassword, name)) {
                     // Save the user data using SharedPreferences
-                    saveUserData(username, password, name);
-                    Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RegisterActivity.this, "Registration successful!"
+                            , Toast.LENGTH_SHORT).show();
 
-                    // Verify that the data is saved
-                    verifyUserData();
-
-                    // Example: Redirect to a welcome screen or the main activity after registration
                     startActivity(new Intent(RegisterActivity.this, MainActivity.class));
                     finish(); // Finish the current activity to prevent going back to the registration page
-                } else {
-                    // Display error message if validation fails
-                    Toast.makeText(RegisterActivity.this, "Please fill in all fields correctly", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -108,8 +101,10 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Check for permission to access the gallery
-                if (ContextCompat.checkSelfPermission(RegisterActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(RegisterActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_CODE);
+                if (ContextCompat.checkSelfPermission(RegisterActivity.this
+                        , Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(RegisterActivity.this
+                            , new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_CODE);
                 } else {
                     showPictureDialog();
                 }
@@ -126,8 +121,10 @@ public class RegisterActivity extends AppCompatActivity {
         builder.setItems(options, (dialog, item) -> {
             if (options[item].equals("Take Photo")) {
                 // Check for camera permission
-                if (ContextCompat.checkSelfPermission(RegisterActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(RegisterActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+                if (ContextCompat.checkSelfPermission(RegisterActivity.this
+                        , Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(RegisterActivity.this
+                            , new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
                 } else {
                     dispatchTakePictureIntent();
                 }
@@ -140,7 +137,6 @@ public class RegisterActivity extends AppCompatActivity {
         builder.show();
     }
 
-
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         try {
@@ -149,7 +145,6 @@ public class RegisterActivity extends AppCompatActivity {
             // display error state to the user
         }
     }
-
 
     private void dispatchPickPictureIntent() {
         Intent pickPictureIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -175,7 +170,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    // Example method for validating input fields
     private boolean validateFields(String username, String password, String confirmPassword, String name) {
         boolean isValid = true;
 
@@ -184,7 +178,8 @@ public class RegisterActivity extends AppCompatActivity {
             usernameEditText.setError("Username is required");
             isValid = false;
         }
-        if (password.length() < 8 || password.length() > 16 || !password.matches("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!@#$%^&*]{8,16}$")) {
+        if (password.length() < 8 || password.length() > 16
+                || !password.matches("^(?=.*[a-zA-Z])(?=.*\\d)[a-zA-Z\\d!@#$%^&*]{8,16}$")) {
             passwordEditText.setError("Password must be between 8-16 characters and combine letters and numbers");
             isValid = false;
         }
@@ -205,30 +200,9 @@ public class RegisterActivity extends AppCompatActivity {
         return isValid;
     }
 
-    // Method to save user data using SharedPreferences
-    private void saveUserData(String username, String password, String name) {
-        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        editor.putString("username", username);
-        editor.putString("password", password);
-        editor.putString("name", name);
-        editor.apply();
-    }
-
-    // Method to retrieve user data from SharedPreferences
-    private void verifyUserData() {
-        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        String username = sharedPreferences.getString("username", "");
-        String password = sharedPreferences.getString("password", "");
-        String name = sharedPreferences.getString("name", "");
-
-        // Display the retrieved data as a Toast message for verification
-        Toast.makeText(this, "Saved Data - Username: " + username + ", Name: " + name, Toast.LENGTH_LONG).show();
-    }
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions
+            , @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == CAMERA_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
