@@ -25,7 +25,7 @@ import java.util.List;
 public class LoginActivity extends AppCompatActivity {
 
     private EditText usernameEditText, passwordEditText;
-    private Button loginButton;
+    private Button loginButton, registerButton;
     private LinearLayout errorContainer;
     private TextView errorText;
     private List<User> userList;
@@ -53,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton = findViewById(R.id.loginButton);
         errorContainer = findViewById(R.id.errorContainer);
         errorText = findViewById(R.id.errorText);
+        registerButton = findViewById(R.id.registerButton);
 
         loadUserData();
 
@@ -71,6 +72,15 @@ public class LoginActivity extends AppCompatActivity {
                     // Login failed, show error message
                     showError("Username or password are not correct. Please try again.");
                 }
+            }
+        });
+
+        // Set click listener for the register button
+        registerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to the RegisterActivity
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
             }
         });
     }

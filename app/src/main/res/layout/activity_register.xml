@@ -56,18 +56,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Sign up"
-                    android:textSize="24sp"
+                    android:textSize="35sp"
                     android:layout_gravity="center"
                     android:layout_marginBottom="20dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Username:"
+                    android:text=""
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="10dp"
-                    android:textStyle="bold"
-                    android:textSize="12sp" />
+                    android:textSize="15sp" />
 
                 <EditText
                     android:id="@+id/username"
@@ -80,7 +79,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Password:"
+                    android:text=""
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="10dp"
                     android:textStyle="bold"
@@ -95,6 +94,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="48dp"
                         android:padding="8dp"
+                        android:layout_marginBottom="15dp"
                         android:hint="Password"
                         android:inputType="textPassword" />
 
@@ -102,11 +102,13 @@
                         android:id="@+id/passwordHelpIcon"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
+                        android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
-                        android:layout_centerVertical="true"
+                        android:layout_marginTop="9dp"
                         android:layout_marginEnd="8dp"
-                        android:src="@android:drawable/ic_menu_help"
-                        android:contentDescription="Password Help" />
+                        android:background="#7C909C"
+                        android:contentDescription="Password Help"
+                        android:src="@android:drawable/ic_menu_help" />
 
                     <TextView
                         android:id="@+id/passwordTooltip"
@@ -126,7 +128,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Confirm Password:"
+                    android:text=""
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="10dp"
                     android:textStyle="bold"
@@ -144,7 +146,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Name:"
+                    android:text=""
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="10dp"
                     android:textStyle="bold"
@@ -164,8 +166,7 @@
                     android:text="Profile Picture:"
                     android:layout_marginBottom="5dp"
                     android:layout_marginLeft="10dp"
-                    android:textStyle="bold"
-                    android:textSize="12sp" />
+                    android:textSize="15sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
