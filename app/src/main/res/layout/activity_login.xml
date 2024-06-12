@@ -26,6 +26,7 @@
                     android:layout_height="56dp"
                     android:layout_alignParentEnd="true"
                     android:layout_marginEnd="16dp"
+                    android:layout_marginTop="20dp"
                     android:background="@null"
                     android:contentDescription="Close Button"
                     android:src="@android:drawable/ic_menu_close_clear_cancel" />
