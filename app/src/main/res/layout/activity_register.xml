@@ -100,15 +100,17 @@
 
                     <ImageView
                         android:id="@+id/passwordHelpIcon"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
                         android:layout_alignParentTop="true"
                         android:layout_alignParentEnd="true"
                         android:layout_marginTop="9dp"
                         android:layout_marginEnd="8dp"
-                        android:background="#7C909C"
+
+                        android:background="#03A9F4"
+                        android:backgroundTint="#0A89ED"
                         android:contentDescription="Password Help"
-                        android:src="@android:drawable/ic_menu_help" />
+                        android:src="@android:drawable/ic_dialog_info" />
 
                     <TextView
                         android:id="@+id/passwordTooltip"
@@ -118,8 +120,8 @@
                         android:background="#FFFFFF"
                         android:elevation="4dp"
                         android:visibility="gone"
-                        android:text="Password must be between 8-16 characters and combine a-Z letters and numbers. It's also possible to use the characters '!@#$%^&amp;*'."
-                        android:textSize="14sp"
+                        android:text="Password must be 8-16 characters and combine letters with numbers. You can use the characters !@#$%^&amp;*"
+                        android:textSize="15sp"
                         android:layout_below="@id/password"
                         android:layout_marginTop="5dp"
                         android:gravity="center" />
