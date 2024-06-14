@@ -9,25 +9,25 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button loginButton;
+    private Button viewVideoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        loginButton = findViewById(R.id.loginButton);
+        viewVideoButton = findViewById(R.id.viewVideoButton);
 
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
+        viewVideoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openLoginActivity(v);
+                openViewVideo(v);
             }
         });
     }
 
-    public void openLoginActivity(View view) {
+    public void openViewVideo(View view) {
         Intent intent = new Intent(MainActivity.this, VideoPage.class);
         startActivity(intent);
 }}
