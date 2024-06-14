@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Youtube-Android"
+rootProject.name = "YoutubeAndroid"
 include(":app")
  

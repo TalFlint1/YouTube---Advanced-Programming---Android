@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="descriptionTextView" type="id" />
+    <item name="titleTextView" type="id" />
+    <item name="videoView" type="id" />
+    <item name="idVideoView" type="id" />
+    <item name="comments_recycler_view" type="id" />
+    <item name="comment_button" type="id" />
+    <item name="comment_user_icon" type="id" />
+    <item name="comment_text" type="id" />
+    <item name="comment_icon" type="id" />
+    <item name="registerButton" type="id" />
+</resources>
