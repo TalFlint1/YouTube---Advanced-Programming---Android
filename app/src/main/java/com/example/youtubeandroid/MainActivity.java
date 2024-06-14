@@ -1,24 +1,39 @@
 package com.example.youtubeandroid;
 
+import android.net.Uri;
 import android.os.Bundle;
+import android.widget.VideoView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.example.youtube_android.R;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        // JSON data
+        String jsonData = "{ \"id\":17,\"title\": \"Video 20\", \"description\": \"Description 1\", \"videoUrl\": \"https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4\", \"thumbnailUrl\": \"thumbnail1.jpg\", \"duration\": \"8:15\", \"owner\":\"צביקה ברגר\" , \"views\":721,\"time_publish\":4,\"time_type\":\"years\",\"user_icon\":\"https://yt3.ggpht.com/xqpDLeDfVG5K9w3VDXzQsg_0tvwqKp9Rg1QSc5d1XUfFTgXeHlQuqJ45ErN9qOCkLB2QwE2MnmE=s68-c-k-c0x00ffffff-no-rj\", \"likes\": 0, \"comments\": []}";
+
+        try {
+            JSONObject jsonObject = new JSONObject(jsonData);
+
+            // Extract video URL from JSON data
+            String videoUrl = jsonObject.getString("videoUrl");
+
+            // Set video source for VideoView
+            VideoView videoView = findViewById(R.id.videoView);
+            videoView.setVideoURI(Uri.parse(videoUrl));
+            videoView.start(); // Start playing the video
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }
