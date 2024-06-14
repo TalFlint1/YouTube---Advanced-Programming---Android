@@ -17,6 +17,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.youtubeandroid.R;
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;

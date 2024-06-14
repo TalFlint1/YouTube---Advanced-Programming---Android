@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.youtube_android"
+    namespace = "com.example.youtubeandroid"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.youtube_android"
+        applicationId = "com.example.youtubeandroid"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+    implementation("com.google.code.gson:gson:2.10.1")
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

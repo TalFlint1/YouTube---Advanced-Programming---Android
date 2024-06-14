@@ -1,7 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <!-- Camera feature -->
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,27 +16,34 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.YoutubeAndroid"
         tools:targetApi="31">
+
         <activity
-            android:name=".video_view"
-            android:exported="false" />
-        <activity
-            android:name=".toolbar"
-            android:exported="false"
-            android:label="@string/title_activity_toolbar"
-            android:theme="@style/Theme.YoutubeAndroid" />
-        <activity
-            android:name=".mainPage"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name="com.example.youtube_android.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".VideoPage"/>
+        <activity android:name="com.example.youtube_android.VideoPage"/>
+
+        <!-- RegisterActivity declaration -->
+        <activity android:name="com.example.youtube_android.RegisterActivity" />
+
+        <!-- LoginActivity declaration -->
+        <activity android:name="com.example.youtube_android.LoginActivity" />
+
+        <!-- FileProvider configuration -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.example.youtube_android.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
+
     </application>
 
 </manifest>
