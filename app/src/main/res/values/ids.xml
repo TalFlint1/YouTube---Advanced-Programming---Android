@@ -9,4 +9,5 @@
     <item name="comment_user_icon" type="id" />
     <item name="comment_text" type="id" />
     <item name="comment_icon" type="id" />
+    <item name="registerButton" type="id" />
 </resources>
