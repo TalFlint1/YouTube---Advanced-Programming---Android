@@ -56,67 +56,69 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Upload a Video"
-                    android:textSize="35sp"
+                    android:text="Upload a New Video"
+                    android:textSize="30sp"
                     android:layout_gravity="center"
-                    android:layout_marginBottom="20dp" />
+                    android:layout_marginBottom="30dp"
+                    android:layout_marginTop="20dp"/>
 
                 <EditText
                     android:id="@+id/title"
                     android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginBottom="15dp"
-                    android:padding="8dp"
-                    android:hint="Title" />
-
-                <EditText
-                    android:id="@+id/url"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:layout_marginBottom="15dp"
-                    android:padding="8dp"
-                    android:hint="Video URL" />
-
-                <TextView
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Or Upload Video:"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="10dp"
-                    android:textSize="15sp" />
+                    android:hint="Video Title"
+                    android:inputType="text"
+                    android:padding="16dp"
+                    android:textSize="22sp"
+                    android:layout_marginBottom="16dp"/>
+
+                <Button
+                    android:id="@+id/selectVideoButton"
+                    android:layout_width="190dp"
+                    android:layout_height="wrap_content"
+                    android:text="Select Video"
+                    android:backgroundTint="#ff0000"
+                    android:textColor="#ffffff"
+                    android:textSize="17sp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginBottom="5dp"/>
+
+                <ImageView
+                    android:id="@+id/videoPreview"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="2dp">
+                    android:orientation="horizontal"
+                    android:gravity="center">
 
                     <ImageView
-                        android:id="@+id/videoPreview"
-                        android:layout_width="100dp"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:layout_marginBottom="2dp"
-                        android:visibility="gone" />
+                        android:id="@+id/uploadLogo"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="20dp"
+                        android:layout_marginRight="5dp"
+                        android:src="@drawable/upload" />
 
                     <Button
-                        android:id="@+id/selectVideoButton"
-                        android:layout_width="match_parent"
+                        android:id="@+id/addVideoButton"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Select Video"
                         android:backgroundTint="#ff0000"
                         android:textColor="#ffffff"
-                        android:layout_marginBottom="5dp" />
+                        android:text="Upload"
+                        android:textSize="17sp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="20dp"/>
                 </LinearLayout>
 
-                <Button
-                    android:id="@+id/addVideoButton"
-                    android:layout_width="140dp"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="#ff0000"
-                    android:text="Add Video"
-                    android:textColor="#ffffff"
-                    android:layout_gravity="center" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

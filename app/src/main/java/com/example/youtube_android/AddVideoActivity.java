@@ -1,6 +1,7 @@
 package com.example.youtube_android;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -28,10 +29,12 @@ import java.io.IOException;
 
 public class AddVideoActivity extends AppCompatActivity {
 
+    private static final int REQUEST_VIDEO_CAPTURE = 1;
     private static final int REQUEST_PICK_VIDEO = 2;
+    private static final int CAMERA_PERMISSION_CODE = 101;
     private static final int GALLERY_PERMISSION_CODE = 102;
 
-    private EditText titleEditText, urlEditText;
+    private EditText titleEditText;
     private Button addVideoButton, selectVideoButton;
     private ImageView videoPreview;
     private Uri selectedVideoUri;
@@ -55,7 +58,6 @@ public class AddVideoActivity extends AppCompatActivity {
         });
 
         titleEditText = findViewById(R.id.title);
-        urlEditText = findViewById(R.id.url);
         addVideoButton = findViewById(R.id.addVideoButton);
         selectVideoButton = findViewById(R.id.selectVideoButton);
         videoPreview = findViewById(R.id.videoPreview);
@@ -64,9 +66,8 @@ public class AddVideoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String title = titleEditText.getText().toString();
-                String url = urlEditText.getText().toString();
 
-                if (validateFields(title, url, selectedVideoUri)) {
+                if (validateFields(title, selectedVideoUri)) {
                     // Handle video upload logic here
                     Toast.makeText(AddVideoActivity.this, "Video added successfully!", Toast.LENGTH_SHORT).show();
 
@@ -79,14 +80,46 @@ public class AddVideoActivity extends AppCompatActivity {
         selectVideoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                showVideoDialog();
+            }
+        });
+    }
+
+    private void showVideoDialog() {
+        final CharSequence[] options = {"Take Video", "Choose from Gallery", "Cancel"};
+
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(AddVideoActivity.this);
+        builder.setTitle("Select Option");
+        builder.setItems(options, (dialog, item) -> {
+            if (options[item].equals("Take Video")) {
+                // Check for camera permission
+                if (ContextCompat.checkSelfPermission(AddVideoActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(AddVideoActivity.this, new String[]{Manifest.permission.CAMERA}, CAMERA_PERMISSION_CODE);
+                } else {
+                    dispatchTakeVideoIntent();
+                }
+            } else if (options[item].equals("Choose from Gallery")) {
                 // Check for permission to access the gallery
                 if (ContextCompat.checkSelfPermission(AddVideoActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(AddVideoActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, GALLERY_PERMISSION_CODE);
                 } else {
                     dispatchPickVideoIntent();
                 }
+            } else if (options[item].equals("Cancel")) {
+                dialog.dismiss();
             }
         });
+        builder.show();
+    }
+
+    private void dispatchTakeVideoIntent() {
+        Intent takeVideoIntent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        try {
+            startActivityForResult(takeVideoIntent, REQUEST_VIDEO_CAPTURE);
+        } catch (ActivityNotFoundException e) {
+            // display error state to the user
+            Toast.makeText(this, "Unable to open camera", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void dispatchPickVideoIntent() {
@@ -97,22 +130,33 @@ public class AddVideoActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == REQUEST_PICK_VIDEO && data != null) {
-            selectedVideoUri = data.getData();
-            if (selectedVideoUri != null) {
-                try {
-                    Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(getRealPathFromUri(selectedVideoUri), MediaStore.Video.Thumbnails.MINI_KIND);
-                    if (thumbnail != null) {
-                        videoPreview.setImageBitmap(thumbnail);
-                        videoPreview.setVisibility(View.VISIBLE);
-                    } else {
-                        Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
+        if (resultCode == RESULT_OK) {
+            if (requestCode == REQUEST_VIDEO_CAPTURE && data != null) {
+                selectedVideoUri = data.getData();
+                if (selectedVideoUri != null) {
+                    setVideoPreview(selectedVideoUri);
+                }
+            } else if (requestCode == REQUEST_PICK_VIDEO && data != null) {
+                selectedVideoUri = data.getData();
+                if (selectedVideoUri != null) {
+                    setVideoPreview(selectedVideoUri);
                 }
             }
+        }
+    }
+
+    private void setVideoPreview(Uri videoUri) {
+        try {
+            Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(getRealPathFromUri(videoUri), MediaStore.Video.Thumbnails.MINI_KIND);
+            if (thumbnail != null) {
+                videoPreview.setImageBitmap(thumbnail);
+                videoPreview.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -131,16 +175,15 @@ public class AddVideoActivity extends AppCompatActivity {
         return uri.getPath();
     }
 
-
-    private boolean validateFields(String title, String url, Uri videoUri) {
+    private boolean validateFields(String title, Uri videoUri) {
         boolean isValid = true;
 
         if (title.isEmpty()) {
             titleEditText.setError("Title is required");
             isValid = false;
         }
-        if (url.isEmpty() && videoUri == null) {
-            urlEditText.setError("Either URL or video file is required");
+        if (videoUri == null) {
+            Toast.makeText(this, "Video is required", Toast.LENGTH_SHORT).show();
             isValid = false;
         }
 
@@ -150,7 +193,13 @@ public class AddVideoActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == GALLERY_PERMISSION_CODE) {
+        if (requestCode == CAMERA_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                dispatchTakeVideoIntent();
+            } else {
+                Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == GALLERY_PERMISSION_CODE) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 dispatchPickVideoIntent();
             } else {
