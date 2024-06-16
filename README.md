@@ -25,7 +25,7 @@ The application includes registration, login, video listing, video viewing, and 
 2. Open Android Studio.
    Click on "Open an existing Android Studio project".
    Navigate to the android-app directory and select it.
-   Build and Run
+   Build and Run.
 
    Connect an Android device or start an emulator.
    Click on the "Run" button in Android Studio.
