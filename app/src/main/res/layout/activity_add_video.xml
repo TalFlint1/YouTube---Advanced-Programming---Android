@@ -113,7 +113,7 @@
                         android:layout_height="wrap_content"
                         android:backgroundTint="#ff0000"
                         android:textColor="#ffffff"
-                        android:text="Upload"
+                        android:text="Upload video"
                         android:textSize="17sp"
                         android:layout_marginTop="16dp"
                         android:layout_marginBottom="20dp"/>
