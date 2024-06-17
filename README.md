@@ -38,4 +38,4 @@ Separation of Logic: Ensured a separation from design by implementing applicatio
 
 This Android application is our first step towards a fully functional YouTube platform for android use.
 
-use branch main_ex1 and run the program when the version is on this branchE
+use branch main_ex1 and run the program when the version is on this branch
