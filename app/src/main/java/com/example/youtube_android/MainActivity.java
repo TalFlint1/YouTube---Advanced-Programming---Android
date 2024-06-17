@@ -13,6 +13,7 @@ public class MainActivity extends AppCompatActivity {
     private Button viewVideoButton;
     private Button registerButton;
     private Button loginButton;
+    private Button addVideoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
         registerButton = findViewById(R.id.registerButton);
         loginButton = findViewById(R.id.loginButton);
+        addVideoButton = findViewById(R.id.addVideoButton);
 
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,6 +47,13 @@ public class MainActivity extends AppCompatActivity {
                 openViewVideo(v);
             }
         });
+
+        addVideoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAddVideoActivity(v);
+            }
+        });
     }
 
     public void openViewVideo(View view) {
@@ -58,6 +67,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void openLoginActivity(View view) {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(intent);
+    }
+
+    public void openAddVideoActivity(View view) {
+        Intent intent = new Intent(MainActivity.this, AddVideoActivity.class);
         startActivity(intent);
     }
 }

@@ -33,6 +33,9 @@
         <!-- LoginActivity declaration -->
         <activity android:name="com.example.youtube_android.LoginActivity" />
 
+        <!-- AddVideoActivity declaration -->
+        <activity android:name="com.example.youtube_android.AddVideoActivity" />
+
         <!-- FileProvider configuration -->
         <provider
             android:name="androidx.core.content.FileProvider"
