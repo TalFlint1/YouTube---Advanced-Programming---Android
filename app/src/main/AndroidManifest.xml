@@ -20,6 +20,9 @@
         android:theme="@style/Theme.YoutubeAndroid"
         tools:targetApi="31">
         <activity
+            android:name="com.example.youtube_android.AddVideoActivity"
+            android:exported="false" />
+        <activity
             android:name="com.example.youtube_android.MainPage"
             android:exported="true">
             <intent-filter>

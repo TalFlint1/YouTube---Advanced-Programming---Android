@@ -6,13 +6,15 @@ public class VideoItem {
     private String views;
     private String time;
     private String videoUrl;
+    private int likeCount;
 
-    public VideoItem(String title, String username, String views, String time, String videoUrl) {
+    public VideoItem(String title, String username, String views, String time, String videoUrl, int likeCount) {
         this.title = title;
         this.username = username;
         this.views = views;
         this.time = time;
         this.videoUrl = videoUrl;
+        this.likeCount = likeCount;
     }
 
     public String getTitle() {
@@ -33,5 +35,9 @@ public class VideoItem {
 
     public String getVideoUrl() {
         return videoUrl;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
     }
 }

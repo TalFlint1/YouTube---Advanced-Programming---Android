@@ -94,7 +94,7 @@
             android:layout_weight="1" />
 
         <ImageButton
-            android:id="@+id/videoPageButton"
+            android:id="@+id/addContentButton"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

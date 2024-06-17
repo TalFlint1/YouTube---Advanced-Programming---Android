@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center_horizontal"
-    tools:context=".VideoPage">
-
+    android:gravity="center_horizontal">
 
     <VideoView
         android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="400dp"
         android:layout_gravity="center" />
+
+    <ProgressBar
+        android:id="@+id/loading_progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="visible" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -26,7 +31,6 @@
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="9dp"
             android:padding="4dp"
-            android:text="First android video"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -36,22 +40,22 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/video_title"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="-1dp"
-            android:layout_marginEnd="18dp"
+            android:layout_marginTop="-14dp"
+            android:layout_marginEnd="60dp"
             android:padding="4dp"
-            android:text="Views: 0"
             android:textSize="14sp" />
 
         <TextView
             android:id="@+id/video_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_above="@+id/likes"
             android:layout_below="@id/video_title"
             android:layout_alignParentEnd="true"
-            android:layout_marginTop="-2dp"
-            android:layout_marginEnd="75dp"
+            android:layout_marginTop="-6dp"
+            android:layout_marginEnd="147dp"
+            android:layout_marginBottom="10dp"
             android:padding="4dp"
-            android:text="before 17 hours"
             android:textSize="14sp" />
 
         <ImageView
@@ -70,11 +74,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/video_title"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="33dp"
-            android:layout_marginEnd="51dp"
+            android:layout_marginTop="37dp"
+            android:layout_marginEnd="45dp"
+            android:layout_toStartOf="@+id/user_icon"
             android:padding="4dp"
-            android:text="כאן חדשות"
             android:textSize="14sp" />
 
         <TextView
@@ -82,11 +85,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/video_title"
-            android:layout_alignParentEnd="true"
-            android:layout_marginTop="34dp"
-            android:layout_marginEnd="129dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginEnd="116dp"
+            android:layout_toStartOf="@+id/video_username"
             android:padding="4dp"
-            android:text="120 לייקים"
             android:textSize="14sp" />
 
     </RelativeLayout>
@@ -125,21 +127,20 @@
                 android:layout_height="50dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:contentDescription="Share Button"
-                android:src="@drawable/share" /> <!-- Replace with your share icon -->
+                android:src="@drawable/share" />
         </LinearLayout>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Comments"
-            android:padding="8dp"/>
+            android:padding="8dp" />
 
         <EditText
             android:id="@+id/comment_edit_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Type your comment here" />
-
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -147,5 +148,4 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
 </LinearLayout>

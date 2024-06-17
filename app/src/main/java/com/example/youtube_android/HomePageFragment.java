@@ -111,7 +111,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
                             break;
                     }
                 }
-                VideoItem videoItem = new VideoItem(title, username, views, time, videoUrl);
+                VideoItem videoItem = new VideoItem(title, username, views, time, videoUrl, 0);
                 videoList.add(videoItem);
                 filteredVideoList.add(videoItem); // Initially, show all videos
                 reader.endObject();
@@ -140,11 +140,12 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public void onItemClick(int position) {
         Intent intent = new Intent(getActivity(), VideoPage.class);
-        intent.putExtra("video_title", filteredVideoList.get(position).getTitle());
-        intent.putExtra("video_username", filteredVideoList.get(position).getUsername());
-        intent.putExtra("video_views", filteredVideoList.get(position).getViews());
-        intent.putExtra("video_time", filteredVideoList.get(position).getTime());
-        intent.putExtra("video_url", filteredVideoList.get(position).getVideoUrl());
+        VideoItem videoItem = filteredVideoList.get(position);
+        intent.putExtra("video_title", videoItem.getTitle());
+        intent.putExtra("video_username", videoItem.getUsername());
+        intent.putExtra("video_views", videoItem.getViews());
+        intent.putExtra("video_time", videoItem.getTime());
+        intent.putExtra("video_url", videoItem.getVideoUrl());
         startActivity(intent);
     }
 

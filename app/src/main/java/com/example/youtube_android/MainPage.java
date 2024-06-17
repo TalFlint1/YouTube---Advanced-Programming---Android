@@ -15,7 +15,7 @@ public class MainPage extends AppCompatActivity {
 
     private ImageButton homepageButton;
     private ImageButton loginButton;
-    private ImageButton videoPageButton;
+    private ImageButton addContentButton;
     private ImageButton searchButton;
     private ImageButton darkmodeButton;
     private HomePageFragment homePageFragment;
@@ -37,7 +37,7 @@ public class MainPage extends AppCompatActivity {
 
         homepageButton = findViewById(R.id.homepageButton);
         loginButton = findViewById(R.id.loginButton);
-        videoPageButton = findViewById(R.id.videoPageButton);
+        addContentButton = findViewById(R.id.addContentButton);
         searchButton = findViewById(R.id.searchButton);
         darkmodeButton = findViewById(R.id.darkmodeButton);
 
@@ -60,10 +60,10 @@ public class MainPage extends AppCompatActivity {
             }
         });
 
-        videoPageButton.setOnClickListener(new View.OnClickListener() {
+        addContentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainPage.this, VideoPage.class);
+                Intent intent = new Intent(MainPage.this, AddVideoActivity.class);
                 startActivity(intent);
             }
         });
