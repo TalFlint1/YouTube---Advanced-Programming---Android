@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -18,34 +19,56 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class HomePageFragment extends Fragment implements RecyclerViewInterface {
 
     private RecyclerView videoRecyclerView;
     private VideoAdapter videoAdapter;
     private List<VideoItem> videoList;
+    private List<VideoItem> filteredVideoList;
+    private EditText searchBar;
     private static final String TAG = "HomePageFragment";
+    private boolean isSearchActive = false;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
 
-        // Initialize the RecyclerView
+        // Initialize the RecyclerView and Search Bar
         videoRecyclerView = view.findViewById(R.id.video_recycler_view);
+        searchBar = view.findViewById(R.id.search_bar);
 
         // Set the Layout Manager for the RecyclerView
         videoRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         // Initialize the video list and adapter
         videoList = new ArrayList<>();
-        videoAdapter = new VideoAdapter(getContext(), videoList, this);
+        filteredVideoList = new ArrayList<>();
+        videoAdapter = new VideoAdapter(getContext(), filteredVideoList, this);
 
         // Attach the adapter to the RecyclerView
         videoRecyclerView.setAdapter(videoAdapter);
 
         // Load data from the JSON file
         loadJsonData();
+
+        // Add text change listener to the search bar
+        searchBar.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (isSearchActive) {
+                    filterVideos(s.toString());
+                }
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
 
         return view;
     }
@@ -88,8 +111,9 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
                             break;
                     }
                 }
-                Log.d(TAG, "Loaded video: " + title);
-                videoList.add(new VideoItem(title, username, views, time, videoUrl));
+                VideoItem videoItem = new VideoItem(title, username, views, time, videoUrl);
+                videoList.add(videoItem);
+                filteredVideoList.add(videoItem); // Initially, show all videos
                 reader.endObject();
             }
             reader.endArray();
@@ -103,14 +127,38 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
         }
     }
 
+    private void filterVideos(String query) {
+        filteredVideoList.clear();
+        for (VideoItem video : videoList) {
+            if (video.getTitle().toLowerCase(Locale.getDefault()).contains(query.toLowerCase(Locale.getDefault()))) {
+                filteredVideoList.add(video);
+            }
+        }
+        videoAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public void onItemClick(int position) {
         Intent intent = new Intent(getActivity(), VideoPage.class);
-        intent.putExtra("video_title", videoList.get(position).getTitle());
-        intent.putExtra("video_username", videoList.get(position).getUsername());
-        intent.putExtra("video_views", videoList.get(position).getViews());
-        intent.putExtra("video_time", videoList.get(position).getTime());
-        intent.putExtra("video_url", videoList.get(position).getVideoUrl());
+        intent.putExtra("video_title", filteredVideoList.get(position).getTitle());
+        intent.putExtra("video_username", filteredVideoList.get(position).getUsername());
+        intent.putExtra("video_views", filteredVideoList.get(position).getViews());
+        intent.putExtra("video_time", filteredVideoList.get(position).getTime());
+        intent.putExtra("video_url", filteredVideoList.get(position).getVideoUrl());
         startActivity(intent);
+    }
+
+    public void toggleSearchBar() {
+        if (searchBar.getVisibility() == View.GONE) {
+            searchBar.setVisibility(View.VISIBLE);
+            isSearchActive = true;
+        } else {
+            searchBar.setVisibility(View.GONE);
+            searchBar.setText(""); // Clear search bar
+            isSearchActive = false;
+            filteredVideoList.clear();
+            filteredVideoList.addAll(videoList);
+            videoAdapter.notifyDataSetChanged();
+        }
     }
 }

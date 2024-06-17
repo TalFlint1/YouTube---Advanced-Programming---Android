@@ -14,6 +14,8 @@ public class MainPage extends AppCompatActivity {
     private ImageButton homepageButton;
     private ImageButton loginButton;
     private ImageButton videoPageButton;
+    private ImageButton searchButton;
+    private HomePageFragment homePageFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,14 +25,16 @@ public class MainPage extends AppCompatActivity {
         homepageButton = findViewById(R.id.homepageButton);
         loginButton = findViewById(R.id.loginButton);
         videoPageButton = findViewById(R.id.videoPageButton);
+        searchButton = findViewById(R.id.searchButton);
 
         // Set default fragment
-        loadFragment(new HomePageFragment());
+        homePageFragment = new HomePageFragment();
+        loadFragment(homePageFragment);
 
         homepageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loadFragment(new HomePageFragment());
+                loadFragment(homePageFragment);
             }
         });
 
@@ -47,6 +51,15 @@ public class MainPage extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainPage.this, VideoPage.class);
                 startActivity(intent);
+            }
+        });
+
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (homePageFragment != null) {
+                    homePageFragment.toggleSearchBar();
+                }
             }
         });
     }
