@@ -29,9 +29,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.example.youtube_android.HomePage"
-            android:exported="false" />
-        <activity
             android:name="com.example.youtube_android.VideoPage"
             android:exported="false" />
         <activity
