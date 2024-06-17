@@ -19,19 +19,22 @@ import com.example.youtubeandroid.R;
 import java.util.List;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHolder> {
+    private final RecyclerViewInterface recyclerViewInterface;
+
     private Context context;
     private List<VideoItem> videoList;
 
-    public VideoAdapter(Context context, List<VideoItem> videoList) {
+    public VideoAdapter(Context context, List<VideoItem> videoList, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.videoList = videoList;
+        this.recyclerViewInterface = recyclerViewInterface;
     }
 
     @NonNull
     @Override
     public VideoViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.video_item, parent, false);
-        return new VideoViewHolder(view);
+        return new VideoViewHolder(view, recyclerViewInterface);
     }
 
     @Override
@@ -68,7 +71,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         VideoView videoView;
         ImageView userIcon;
 
-        public VideoViewHolder(@NonNull View itemView) {
+        public VideoViewHolder(@NonNull View itemView, RecyclerViewInterface recyclerViewInterface) {
             super(itemView);
             title = itemView.findViewById(R.id.video_title);
             username = itemView.findViewById(R.id.video_username);
@@ -76,6 +79,16 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
             time = itemView.findViewById(R.id.video_time);
             videoView = itemView.findViewById(R.id.video_view);
             userIcon = itemView.findViewById(R.id.user_icon);
+
+            itemView.setOnClickListener(v -> {
+                if (recyclerViewInterface != null) {
+                    int pos = getAdapterPosition();
+
+                    if (pos != RecyclerView.NO_POSITION) {
+                        recyclerViewInterface.onItemClick(pos);
+                    }
+                }
+            });
         }
     }
 }

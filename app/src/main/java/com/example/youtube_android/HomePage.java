@@ -1,5 +1,6 @@
 package com.example.youtube_android;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
@@ -15,7 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomePage extends AppCompatActivity {
+public class HomePage extends AppCompatActivity implements RecyclerViewInterface {
 
     private RecyclerView videoRecyclerView;
     private VideoAdapter videoAdapter;
@@ -35,7 +36,7 @@ public class HomePage extends AppCompatActivity {
 
         // Initialize the video list and adapter
         videoList = new ArrayList<>();
-        videoAdapter = new VideoAdapter(this, videoList);
+        videoAdapter = new VideoAdapter(this, videoList, this);
 
         // Attach the adapter to the RecyclerView
         videoRecyclerView.setAdapter(videoAdapter);
@@ -96,5 +97,16 @@ public class HomePage extends AppCompatActivity {
             e.printStackTrace();
 //            Log.e(TAG, "Error loading data", e);
         }
+    }
+
+    @Override
+    public void onItemClick(int position) {
+        Intent intent = new Intent(HomePage.this, VideoPage.class);
+        intent.putExtra("video_title", videoList.get(position).getTitle());
+        intent.putExtra("video_username", videoList.get(position).getUsername());
+        intent.putExtra("video_views", videoList.get(position).getViews());
+        intent.putExtra("video_time", videoList.get(position).getTime());
+        intent.putExtra("video_url", videoList.get(position).getVideoUrl());
+        startActivity(intent);
     }
 }

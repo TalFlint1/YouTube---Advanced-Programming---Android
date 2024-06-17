@@ -87,7 +87,7 @@ public class MainPage extends AppCompatActivity {
 //        startActivity(intent);
 //    }
 
-        public void videoPageActivity(View view) {
+    public void videoPageActivity(View view) {
         Intent intent = new Intent(MainPage.this, VideoPage.class);
         startActivity(intent);
     }
