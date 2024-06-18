@@ -67,7 +67,7 @@ public class VideoPage extends AppCompatActivity {
         String views = getIntent().getStringExtra("video_views");
         String time = getIntent().getStringExtra("video_time");
         String videoUrl = getIntent().getStringExtra("video_url");
-        likeCount = getIntent().getIntExtra("like_count", 0); // Get the like count from intent
+        likeCount = getIntent().getIntExtra("like_count", 0);
 
         // Set video details
         videoTitle.setText(title);
@@ -76,15 +76,19 @@ public class VideoPage extends AppCompatActivity {
         videoTime.setText(time);
         likes.setText("" + likeCount + " לייקים"); // Set the like count
 
+
+
+
         // Ensure the video URL is valid
         if (videoUrl != null && !videoUrl.isEmpty()) {
-            Uri uri = Uri.parse(videoUrl);
+            Uri uri = getResourceUri(videoUrl);
+            //Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.v3);
             videoView.setVideoURI(uri);
             MediaController mediaController = new MediaController(this);
             videoView.setMediaController(mediaController);
             mediaController.setAnchorView(videoView);
-            videoView.requestFocus();
-            videoView.start();
+//            videoView.requestFocus();
+//            videoView.start();
         } else {
             // Handle invalid video URL
             // Show a message to the user or log the error
@@ -161,4 +165,14 @@ public class VideoPage extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+    private Uri getResourceUri(String resourceName) {
+        // Get the package name
+        String packageName = getPackageName();
+        // Get the resource ID from the resource name
+        int resourceId = getResources().getIdentifier(resourceName, "raw", packageName);
+        // Construct the URI
+        Uri uri = Uri.parse("android.resource://" + packageName + "/" + resourceId);
+        return uri;
+    }
+
 }
