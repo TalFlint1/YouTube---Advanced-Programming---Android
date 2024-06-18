@@ -50,7 +50,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate back to the main page (MainActivity)
-                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                startActivity(new Intent(RegisterActivity.this, MainPage.class));
                 finish(); // Finish the current activity to prevent going back to the registration page
             }
         });
@@ -91,7 +91,7 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast.makeText(RegisterActivity.this, "Registration successful!"
                             , Toast.LENGTH_SHORT).show();
 
-                    startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                    startActivity(new Intent(RegisterActivity.this, MainPage.class));
                     finish(); // Finish the current activity to prevent going back to the registration page
                 }
             }

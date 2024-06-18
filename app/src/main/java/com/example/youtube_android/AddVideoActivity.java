@@ -52,7 +52,7 @@ public class AddVideoActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate back to the main page (MainActivity)
-                startActivity(new Intent(AddVideoActivity.this, MainActivity.class));
+                startActivity(new Intent(AddVideoActivity.this, MainPage.class));
                 finish(); // Finish the current activity to prevent going back to this page
             }
         });
@@ -71,7 +71,8 @@ public class AddVideoActivity extends AppCompatActivity {
                     // Handle video upload logic here
                     Toast.makeText(AddVideoActivity.this, "Video added successfully!", Toast.LENGTH_SHORT).show();
 
-                    startActivity(new Intent(AddVideoActivity.this, MainActivity.class));
+
+                    startActivity(new Intent(AddVideoActivity.this, MainPage.class));
                     finish(); // Finish the current activity to prevent going back to this page
                 }
             }

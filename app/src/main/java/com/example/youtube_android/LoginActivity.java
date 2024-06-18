@@ -47,7 +47,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate back to the main page (MainActivity)
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                startActivity(new Intent(LoginActivity.this, MainPage.class));
                 finish(); // Finish the current activity to prevent going back to the login page
             }
         });
@@ -70,7 +70,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (validateLogin(username, password)) {
                     // Login successful
                     Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    startActivity(new Intent(LoginActivity.this, MainPage.class));
                     finish();
                 } else {
                     // Login failed, show error message

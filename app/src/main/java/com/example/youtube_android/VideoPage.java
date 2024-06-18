@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -21,6 +20,7 @@ import com.example.youtubeandroid.R;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +31,6 @@ public class VideoPage extends AppCompatActivity {
     private EditText commentEditText;
     private ImageButton commentButton;
 
-    // private Button commentButton;
     private RecyclerView commentsRecyclerView;
     private CommentsAdapter commentsAdapter;
     private List<String> commentsList;
@@ -43,7 +42,6 @@ public class VideoPage extends AppCompatActivity {
     private TextView videoTime;
     private TextView videoUsername;
     private TextView likes;
-    private TextView videoUrlText;
     private ImageView userIcon;
 
     @Override
@@ -61,14 +59,37 @@ public class VideoPage extends AppCompatActivity {
         videoTime = findViewById(R.id.video_time);
         videoUsername = findViewById(R.id.video_username);
         userIcon = findViewById(R.id.user_icon);
-        likes= findViewById(R.id.likes);
+        likes = findViewById(R.id.likes);
 
-        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.v3);
-        videoView.setVideoURI(uri);
+        // Get video details from intent
+        String title = getIntent().getStringExtra("video_title");
+        String username = getIntent().getStringExtra("video_username");
+        String views = getIntent().getStringExtra("video_views");
+        String time = getIntent().getStringExtra("video_time");
+        String videoUrl = getIntent().getStringExtra("video_url");
+        likeCount = getIntent().getIntExtra("like_count", 0); // Get the like count from intent
 
-        MediaController mediaController = new MediaController(this);
-        videoView.setMediaController(mediaController);
-        mediaController.setAnchorView(videoView);
+        // Set video details
+        videoTitle.setText(title);
+        videoUsername.setText(username);
+        videoViews.setText(views);
+        videoTime.setText(time);
+        likes.setText("" + likeCount + " לייקים"); // Set the like count
+
+        // Ensure the video URL is valid
+        if (videoUrl != null && !videoUrl.isEmpty()) {
+            Uri uri = Uri.parse(videoUrl);
+            videoView.setVideoURI(uri);
+            MediaController mediaController = new MediaController(this);
+            videoView.setMediaController(mediaController);
+            mediaController.setAnchorView(videoView);
+            videoView.requestFocus();
+            videoView.start();
+        } else {
+            // Handle invalid video URL
+            // Show a message to the user or log the error
+            videoTitle.setText("Invalid video URL");
+        }
 
         commentsList = new ArrayList<>();
         commentsAdapter = new CommentsAdapter(commentsList);
@@ -110,29 +131,12 @@ public class VideoPage extends AppCompatActivity {
     private void loadJsonData() {
         try {
             InputStream inputStream = getResources().openRawResource(R.raw.data);
-            JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
+            JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
             reader.beginObject();
-
-            String videoUrl = null;
 
             while (reader.hasNext()) {
                 String name = reader.nextName();
                 switch (name) {
-                    case "title":
-                        videoTitle.setText(reader.nextString());
-                        break;
-                    case "views":
-                        videoViews.setText(reader.nextString());
-                        break;
-                    case "time":
-                        videoTime.setText(reader.nextString());
-                        break;
-                    case "username":
-                        videoUsername.setText(reader.nextString());
-                        break;
-                    case "video_url":
-                        videoUrl = reader.nextString();
-                        break;
                     case "likeCount":
                         likeCount = reader.nextInt();
                         likes.setText("" + likeCount + " לייקים"); // Update the displayed like count
