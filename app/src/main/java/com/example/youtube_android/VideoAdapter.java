@@ -22,9 +22,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     private final RecyclerViewInterface recyclerViewInterface;
 
     private Context context;
-    private List<VideoItem> videoList;
+    private List<Video> videoList;
 
-    public VideoAdapter(Context context, List<VideoItem> videoList, RecyclerViewInterface recyclerViewInterface) {
+    public VideoAdapter(Context context, List<Video> videoList, RecyclerViewInterface recyclerViewInterface) {
         this.context = context;
         this.videoList = videoList;
         this.recyclerViewInterface = recyclerViewInterface;
@@ -39,7 +39,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
 
     @Override
     public void onBindViewHolder(@NonNull VideoViewHolder holder, int position) {
-        VideoItem videoItem = videoList.get(position);
+        Video videoItem = videoList.get(position);
         holder.title.setText(videoItem.getTitle());
         holder.username.setText(videoItem.getUsername());
         holder.views.setText(videoItem.getViews());

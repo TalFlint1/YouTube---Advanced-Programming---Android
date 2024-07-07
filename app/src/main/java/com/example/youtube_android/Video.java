@@ -1,6 +1,6 @@
 package com.example.youtube_android;
 
-public class VideoItem {
+public class Video {
     private String title;
     private String username;
     private String views;
@@ -8,7 +8,7 @@ public class VideoItem {
     private String videoUrl;
     private int likeCount;
 
-    public VideoItem(String title, String username, String views, String time, String videoUrl, int likeCount) {
+    public Video(String title, String username, String views, String time, String videoUrl, int likeCount) {
         this.title = title;
         this.username = username;
         this.views = views;

@@ -25,8 +25,8 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
 
     private RecyclerView videoRecyclerView;
     private VideoAdapter videoAdapter;
-    private List<VideoItem> videoList;
-    private List<VideoItem> filteredVideoList;
+    private List<Video> videoList;
+    private List<Video> filteredVideoList;
     private EditText searchBar;
     private static final String TAG = "HomePageFragment";
     private boolean isSearchActive = false;
@@ -111,7 +111,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
                             break;
                     }
                 }
-                VideoItem videoItem = new VideoItem(title, username, views, time, videoUrl, 0);
+                Video videoItem = new Video(title, username, views, time, videoUrl, 0);
                 videoList.add(videoItem);
                 filteredVideoList.add(videoItem); // Initially, show all videos
                 reader.endObject();
@@ -129,7 +129,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
 
     private void filterVideos(String query) {
         filteredVideoList.clear();
-        for (VideoItem video : videoList) {
+        for (Video video : videoList) {
             if (video.getTitle().toLowerCase(Locale.getDefault()).contains(query.toLowerCase(Locale.getDefault()))) {
                 filteredVideoList.add(video);
             }
@@ -140,7 +140,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public void onItemClick(int position) {
         Intent intent = new Intent(getActivity(), VideoPage.class);
-        VideoItem videoItem = filteredVideoList.get(position);
+        Video videoItem = filteredVideoList.get(position);
         intent.putExtra("video_title", videoItem.getTitle());
         intent.putExtra("video_username", videoItem.getUsername());
         intent.putExtra("video_views", videoItem.getViews());
