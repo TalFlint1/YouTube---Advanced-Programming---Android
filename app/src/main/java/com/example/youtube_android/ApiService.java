@@ -3,6 +3,8 @@ package com.example.youtube_android;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
@@ -13,8 +15,8 @@ public interface ApiService {
     @GET("/api/videos")
     Call<List<Video>> getVideos();
 
-    @GET("/api/users/{id}")
-    Call<User> getUser(@Path("id") String userId);
+    @GET("/api/users/{username}")
+    Call<User> getUserDetails(@Path("username") String username);
 
     @PATCH("/api/users/{id}")
     Call<User> updateUser(@Path("id") String userId, @Body User user);
@@ -42,5 +44,10 @@ public interface ApiService {
 
     @POST("/api/tokens")
     Call<JwtResponse> createToken(@Body LoginRequest loginRequest);
+
+    // Example for POST /api/users/login
+    @POST("/api/users/login")
+    @FormUrlEncoded
+    Call<LoginResponse> loginUser(@Body LoginRequest loginRequest);
 }
 

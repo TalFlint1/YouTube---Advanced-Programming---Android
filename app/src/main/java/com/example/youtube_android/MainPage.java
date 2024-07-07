@@ -3,6 +3,7 @@ package com.example.youtube_android;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,6 +11,10 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.youtubeandroid.R;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainPage extends AppCompatActivity {
 
@@ -19,6 +24,7 @@ public class MainPage extends AppCompatActivity {
     private ImageButton searchButton;
     private ImageButton darkmodeButton;
     private HomePageFragment homePageFragment;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +40,9 @@ public class MainPage extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_main_page);
+
+        // Initialize ApiService using RetrofitClient
+        apiService = RetrofitClient.getApiService();
 
         homepageButton = findViewById(R.id.homepageButton);
         loginButton = findViewById(R.id.loginButton);
@@ -90,6 +99,35 @@ public class MainPage extends AppCompatActivity {
                 }
             }
         });
+
+        // Example: Perform login and load user data
+        String username = sharedPreferences.getString("currentUser", "");
+        String token = sharedPreferences.getString("jwtToken", "");
+
+        if (!username.isEmpty() && !token.isEmpty()) {
+            // Perform login using Retrofit API service
+            LoginRequest loginRequest = new LoginRequest(username, "");
+            Call<LoginResponse> call = apiService.loginUser(loginRequest);
+            call.enqueue(new Callback<LoginResponse>() {
+                @Override
+                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        LoginResponse loginResponse = response.body();
+                        // Here you can handle other data if needed, such as name, profile details, etc.
+                        // For now, we skip updating the profile picture
+                    } else {
+                        // Handle unsuccessful login (e.g., invalid credentials)
+                        Log.e("MainPage", "Failed to login: " + response.message());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<LoginResponse> call, Throwable t) {
+                    // Handle network errors
+                    Log.e("MainPage", "Error logging in: " + t.getMessage());
+                }
+            });
+        }
     }
 
     private void loadFragment(Fragment fragment) {
@@ -103,6 +141,24 @@ public class MainPage extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("dark_mode", isDarkMode);
+        editor.apply();
+    }
+
+    private void saveToken(String token) {
+        // Save token in SharedPreferences or any other secure storage method
+        // Example using SharedPreferences
+        SharedPreferences preferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("jwtToken", token);
+        editor.apply();
+    }
+
+    private void saveProfilePicture(String profilePictureUrl) {
+        // Save profile picture URL in SharedPreferences or any other storage method
+        // Example using SharedPreferences
+        SharedPreferences preferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("profilePictureUrl", profilePictureUrl);
         editor.apply();
     }
 }
