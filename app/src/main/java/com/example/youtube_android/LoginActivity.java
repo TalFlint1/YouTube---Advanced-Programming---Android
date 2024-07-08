@@ -88,7 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(LoginActivity.this, MainPage.class));
                 finish();
             } else {
-                showError("Login failed. Please try again.");
+                showError("Login failed. Please try again");
             }
         });
 
