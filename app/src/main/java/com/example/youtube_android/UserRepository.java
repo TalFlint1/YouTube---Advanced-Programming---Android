@@ -53,6 +53,34 @@ public class UserRepository {
         });
     }
 
+    // Method to perform register operation
+    public void registerUser(RegisterRequest registerRequest, final RegisterCallback callback) {
+        apiService.registerUser(registerRequest).enqueue(new Callback<RegisterResponse>() {
+            @Override
+            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    RegisterResponse registerResponse = response.body();
+                    // Save user data to SharedPreferences
+                    saveToken(registerResponse.getToken());
+                    // Pass the register response to ViewModel
+                    callback.onRegisterResponse(registerResponse);
+                } else {
+                    // Handle other HTTP error codes
+                    String errorMessage = "Failed to register: " + response.message();
+                    Log.e("UserRepository", errorMessage);
+                    callback.onRegisterError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<RegisterResponse> call, Throwable t) {
+                String errorMessage = "Network error. Please try again later.";
+                Log.e("UserRepository", errorMessage, t);
+                callback.onRegisterError(errorMessage);
+            }
+        });
+    }
+
 
     // Method to save token to SharedPreferences
     public void saveToken(String token) {
@@ -78,5 +106,11 @@ public class UserRepository {
     public interface LoginCallback {
         void onLoginResponse(LoginResponse response);
         void onLoginError(String errorMessage);
+    }
+
+    // Interface to handle register callback
+    public interface RegisterCallback {
+        void onRegisterResponse(RegisterResponse response);
+        void onRegisterError(String errorMessage);
     }
 }

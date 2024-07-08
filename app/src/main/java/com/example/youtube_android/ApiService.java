@@ -48,5 +48,8 @@ public interface ApiService {
     // Example for POST /api/users/login
     @POST("/api/users/login")
     Call<LoginResponse> loginUser(@Body LoginRequest loginRequest);
+
+    @POST("/api/users")
+    Call<RegisterResponse> registerUser(@Body RegisterRequest registerRequest);
 }
 
