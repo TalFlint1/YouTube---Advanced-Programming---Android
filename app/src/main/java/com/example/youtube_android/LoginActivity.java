@@ -82,6 +82,7 @@ public class LoginActivity extends AppCompatActivity {
                 editor.putString("jwtToken", token);
                 editor.putString("currentUser", usernameEditText.getText().toString());
                 editor.putString("profilePictureUrl", profilePictureUrl);
+                editor.putBoolean("isSignedIn", true);
                 editor.apply();
 
                 Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();

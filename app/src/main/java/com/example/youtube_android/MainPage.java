@@ -12,14 +12,11 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.youtubeandroid.R;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class MainPage extends AppCompatActivity {
 
     private ImageButton homepageButton;
     private ImageButton loginButton;
+    private ImageButton signoutButton;
     private ImageButton addContentButton;
     private ImageButton searchButton;
     private ImageButton darkmodeButton;
@@ -29,16 +26,6 @@ public class MainPage extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Load user preference for dark mode
-        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        boolean isDarkMode = sharedPreferences.getBoolean("dark_mode", false);
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        }
-
         setContentView(R.layout.activity_main_page);
 
         // Initialize ApiService using RetrofitClient
@@ -46,13 +33,47 @@ public class MainPage extends AppCompatActivity {
 
         homepageButton = findViewById(R.id.homepageButton);
         loginButton = findViewById(R.id.loginButton);
+        signoutButton = findViewById(R.id.signoutButton);
         addContentButton = findViewById(R.id.addContentButton);
         searchButton = findViewById(R.id.searchButton);
         darkmodeButton = findViewById(R.id.darkmodeButton);
-
         // Set default fragment
         homePageFragment = new HomePageFragment();
         loadFragment(homePageFragment);
+
+        // Load user preference for dark mode
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        boolean isLoggedIn = sharedPreferences.getBoolean("isSignedIn", false);
+        boolean isDarkMode = sharedPreferences.getBoolean("dark_mode", false);
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
+        if (isLoggedIn) {
+            loginButton.setVisibility(View.GONE); // Hide login button if logged in
+            signoutButton.setVisibility(View.VISIBLE); // Show sign-out button if logged in
+        } else {
+            loginButton.setVisibility(View.VISIBLE); // Show login button if not logged in
+            signoutButton.setVisibility(View.GONE); // Hide sign-out button if not logged in
+        }
+        signoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Handle sign-out logic
+                SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.remove("jwtToken");
+                editor.remove("currentUser");
+                editor.putBoolean("isSignedIn", false);
+                editor.apply();
+
+                // Update UI after sign-out
+                loginButton.setVisibility(View.VISIBLE);
+                signoutButton.setVisibility(View.GONE);
+            }
+        });
 
         homepageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,50 +120,6 @@ public class MainPage extends AppCompatActivity {
                 }
             }
         });
-
-        // Example: Perform login and load user data
-        String username = sharedPreferences.getString("currentUser", "");
-        String token = sharedPreferences.getString("jwtToken", "");
-
-        if (!username.isEmpty() && !token.isEmpty()) {
-            // Perform login using Retrofit API service
-            LoginRequest loginRequest = new LoginRequest(username, "");
-            Call<LoginResponse> call = apiService.loginUser(loginRequest);
-            call.enqueue(new Callback<LoginResponse>() {
-                @Override
-                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        LoginResponse loginResponse = response.body();
-                        String profilePictureUrl = loginResponse.getProfilePictureUrl();
-                        // Save user data to SharedPreferences
-                        saveToken(loginResponse.getToken());
-                        saveProfilePicture(profilePictureUrl);
-                        // Log the SharedPreferences values
-                        displaySharedPreferences();
-                    } else {
-                        // Handle unsuccessful login (e.g., invalid credentials)
-                        Log.e("MainPage", "Failed to login: " + response.message());
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<LoginResponse> call, Throwable t) {
-                    // Handle network errors
-                    Log.e("MainPage", "Error logging in: " + t.getMessage());
-                }
-            });
-        }
-    }
-
-    private void displaySharedPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        String username = sharedPreferences.getString("currentUser", "");
-        String token = sharedPreferences.getString("jwtToken", "");
-        String profilePictureUrl = sharedPreferences.getString("profilePictureUrl", "");
-
-        Log.d("SharedPreferences", "Username: " + username);
-        Log.d("SharedPreferences", "Token: " + token);
-        Log.d("SharedPreferences", "ProfilePictureUrl: " + profilePictureUrl);
     }
 
     private void loadFragment(Fragment fragment) {
@@ -157,15 +134,5 @@ public class MainPage extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("dark_mode", isDarkMode);
         editor.apply();
-    }
-
-    private void saveToken(String token) {
-        UserRepository userRepository = new UserRepository(getApplicationContext());
-        userRepository.saveToken(token);
-    }
-
-    private void saveProfilePicture(String profilePictureUrl) {
-        UserRepository userRepository = new UserRepository(getApplicationContext());
-        userRepository.saveProfilePicture(profilePictureUrl);
     }
 }

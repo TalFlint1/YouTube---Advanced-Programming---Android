@@ -86,6 +86,15 @@
             android:src="@drawable/ic_user_register"
             android:background="?attr/selectableItemBackground"
             android:contentDescription="@string/register_button_desc"/>
+        <ImageButton
+            android:id="@+id/signoutButton"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_sign_out"
+            android:background="?attr/selectableItemBackground"
+            android:contentDescription="sign out"/>
 
         <!-- Spacer -->
         <View
