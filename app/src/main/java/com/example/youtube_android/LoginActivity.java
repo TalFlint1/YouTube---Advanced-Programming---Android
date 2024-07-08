@@ -77,7 +77,6 @@ public class LoginActivity extends AppCompatActivity {
             if (loginResponse != null) {
                 String token = loginResponse.getToken();
                 String profilePictureUrl = loginResponse.getProfilePictureUrl();
-
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("jwtToken", token);
                 editor.putString("currentUser", usernameEditText.getText().toString());
