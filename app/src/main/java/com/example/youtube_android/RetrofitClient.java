@@ -9,7 +9,7 @@ public class RetrofitClient {
     public static ApiService getApiService() {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                    .baseUrl("http://localhost:3001") // Use your server's base URL
+                    .baseUrl("http://172.31.208.1:3001") // Use your server's base URL
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }

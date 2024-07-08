@@ -113,8 +113,12 @@ public class MainPage extends AppCompatActivity {
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         LoginResponse loginResponse = response.body();
-                        // Here you can handle other data if needed, such as name, profile details, etc.
-                        // For now, we skip updating the profile picture
+                        String profilePictureUrl = loginResponse.getProfilePictureUrl();
+                        // Save user data to SharedPreferences
+                        saveToken(loginResponse.getToken());
+                        saveProfilePicture(profilePictureUrl);
+                        // Log the SharedPreferences values
+                        displaySharedPreferences();
                     } else {
                         // Handle unsuccessful login (e.g., invalid credentials)
                         Log.e("MainPage", "Failed to login: " + response.message());
@@ -128,6 +132,17 @@ public class MainPage extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void displaySharedPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        String username = sharedPreferences.getString("currentUser", "");
+        String token = sharedPreferences.getString("jwtToken", "");
+        String profilePictureUrl = sharedPreferences.getString("profilePictureUrl", "");
+
+        Log.d("SharedPreferences", "Username: " + username);
+        Log.d("SharedPreferences", "Token: " + token);
+        Log.d("SharedPreferences", "ProfilePictureUrl: " + profilePictureUrl);
     }
 
     private void loadFragment(Fragment fragment) {

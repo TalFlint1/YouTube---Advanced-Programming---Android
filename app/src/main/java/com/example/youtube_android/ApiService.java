@@ -47,7 +47,6 @@ public interface ApiService {
 
     // Example for POST /api/users/login
     @POST("/api/users/login")
-    @FormUrlEncoded
     Call<LoginResponse> loginUser(@Body LoginRequest loginRequest);
 }
 

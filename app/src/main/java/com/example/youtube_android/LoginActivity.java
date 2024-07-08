@@ -1,7 +1,11 @@
 package com.example.youtube_android;
 
+import static androidx.constraintlayout.helper.widget.MotionEffect.TAG;
+
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,6 +29,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -33,6 +41,8 @@ public class LoginActivity extends AppCompatActivity {
     private LinearLayout errorContainer;
     private TextView errorText;
     private List<User> userList;
+    private SharedPreferences sharedPreferences;
+    private ApiService apiService;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,7 +69,8 @@ public class LoginActivity extends AppCompatActivity {
         errorText = findViewById(R.id.errorText);
         registerButton = findViewById(R.id.registerButton);
 
-        loadUserData();
+        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        apiService = RetrofitClient.getApiService();
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,15 +78,7 @@ public class LoginActivity extends AppCompatActivity {
                 String username = usernameEditText.getText().toString();
                 String password = passwordEditText.getText().toString();
 
-                if (validateLogin(username, password)) {
-                    // Login successful
-                    Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, MainPage.class));
-                    finish();
-                } else {
-                    // Login failed, show error message
-                    showError("Username or password are not correct. Please try again.");
-                }
+                performLogin(username, password);
             }
         });
 
@@ -89,33 +92,44 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void loadUserData() {
-        try {
-            // Read JSON file from assets directory
-            InputStream inputStream = getAssets().open("users.json");
-            InputStreamReader reader = new InputStreamReader(inputStream);
+    private void performLogin(String username, String password) {
+        LoginRequest loginRequest = new LoginRequest(username, password);
+        Call<LoginResponse> call = apiService.loginUser(loginRequest);
+        call.enqueue(new Callback<LoginResponse>() {
+            @Override
+            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
+                Log.d("LoginRequest", "Username: " + loginRequest.getUsername());
+                Log.d("LoginRequest", "Password: " + loginRequest.getPassword());
+                if (response.isSuccessful() && response.body() != null) {
+                    LoginResponse loginResponse = response.body();
+                    String token = loginResponse.getToken();
+                    String profilePictureUrl = loginResponse.getProfilePictureUrl();
 
-            // Parse JSON using Gson
-            Gson gson = new Gson();
-            Type listType = new TypeToken<ArrayList<User>>() {}.getType();
-            userList = gson.fromJson(reader, listType);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("jwtToken", token);
+                    editor.putString("currentUser", username);
+                    editor.putString("profilePictureUrl", profilePictureUrl);
+                    editor.apply();
 
-            // Close streams
-            reader.close();
-            inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private boolean validateLogin(String username, String password) {
-        // Check if username and password match any user account
-        for (User user : userList) {
-            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
-                return true; // Login successful
+                    Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(LoginActivity.this, MainPage.class));
+                    finish();
+                } else {
+                    // Login failed, show error message
+                    showError("Username or password are not correct. Please try again.");
+                    Log.e(TAG, "Login failed with response code: " + response.code());
+                    Log.e(TAG, "Response message: " + response.message());
+                }
             }
-        }
-        return false; // Login failed
+
+            @Override
+            public void onFailure(Call<LoginResponse> call, Throwable t) {
+                Log.e(TAG, "Login failed: " + t.getMessage());
+                t.printStackTrace();
+                // Handle network errors
+                showError("Login error. Please try again later.");
+            }
+        });
     }
 
     private void showError(String message) {
