@@ -160,20 +160,12 @@ public class MainPage extends AppCompatActivity {
     }
 
     private void saveToken(String token) {
-        // Save token in SharedPreferences or any other secure storage method
-        // Example using SharedPreferences
-        SharedPreferences preferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("jwtToken", token);
-        editor.apply();
+        UserRepository userRepository = new UserRepository(getApplicationContext());
+        userRepository.saveToken(token);
     }
 
     private void saveProfilePicture(String profilePictureUrl) {
-        // Save profile picture URL in SharedPreferences or any other storage method
-        // Example using SharedPreferences
-        SharedPreferences preferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("profilePictureUrl", profilePictureUrl);
-        editor.apply();
+        UserRepository userRepository = new UserRepository(getApplicationContext());
+        userRepository.saveProfilePicture(profilePictureUrl);
     }
 }

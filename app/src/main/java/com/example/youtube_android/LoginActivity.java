@@ -16,7 +16,8 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 //import com.google.firebase.crashlytics.buildtools.reloc.com.google.common.reflect.TypeToken;
 import com.example.youtubeandroid.R;
 import com.google.gson.Gson;
@@ -43,6 +44,7 @@ public class LoginActivity extends AppCompatActivity {
     private List<User> userList;
     private SharedPreferences sharedPreferences;
     private ApiService apiService;
+    private LoginViewModel loginViewModel;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,66 +72,44 @@ public class LoginActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.registerButton);
 
         sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
-        apiService = RetrofitClient.getApiService();
+        loginViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(LoginViewModel.class);
+        loginViewModel.getLoginResponse().observe(this, loginResponse -> {
+            if (loginResponse != null) {
+                String token = loginResponse.getToken();
+                String profilePictureUrl = loginResponse.getProfilePictureUrl();
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username = usernameEditText.getText().toString();
-                String password = passwordEditText.getText().toString();
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("jwtToken", token);
+                editor.putString("currentUser", usernameEditText.getText().toString());
+                editor.putString("profilePictureUrl", profilePictureUrl);
+                editor.apply();
 
-                performLogin(username, password);
+                Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(LoginActivity.this, MainPage.class));
+                finish();
+            } else {
+                showError("Login failed. Please try again.");
             }
         });
 
-        // Set click listener for the register button
-        registerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to the RegisterActivity
-                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
-            }
+
+        loginButton.setOnClickListener(v -> {
+            String username = usernameEditText.getText().toString();
+            String password = passwordEditText.getText().toString();
+
+            performLogin(username, password);
+        });
+
+        registerButton.setOnClickListener(v -> {
+            startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
         });
     }
 
     private void performLogin(String username, String password) {
         LoginRequest loginRequest = new LoginRequest(username, password);
-        Call<LoginResponse> call = apiService.loginUser(loginRequest);
-        call.enqueue(new Callback<LoginResponse>() {
-            @Override
-            public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                Log.d("LoginRequest", "Username: " + loginRequest.getUsername());
-                Log.d("LoginRequest", "Password: " + loginRequest.getPassword());
-                if (response.isSuccessful() && response.body() != null) {
-                    LoginResponse loginResponse = response.body();
-                    String token = loginResponse.getToken();
-                    String profilePictureUrl = loginResponse.getProfilePictureUrl();
-
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString("jwtToken", token);
-                    editor.putString("currentUser", username);
-                    editor.putString("profilePictureUrl", profilePictureUrl);
-                    editor.apply();
-
-                    Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, MainPage.class));
-                    finish();
-                } else {
-                    // Login failed, show error message
-                    showError("Username or password are not correct. Please try again.");
-                    Log.e(TAG, "Login failed with response code: " + response.code());
-                    Log.e(TAG, "Response message: " + response.message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Log.e(TAG, "Login failed: " + t.getMessage());
-                t.printStackTrace();
-                // Handle network errors
-                showError("Login error. Please try again later.");
-            }
-        });
+        Log.d("LoginRequest", "Username: " + loginRequest.getUsername());
+        Log.d("LoginRequest", "Password: " + loginRequest.getPassword());
+        loginViewModel.login(loginRequest);
     }
 
     private void showError(String message) {
