@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import android.view.View;
 import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,7 @@ public class MainPage extends AppCompatActivity {
     private ImageButton darkmodeButton;
     private HomePageFragment homePageFragment;
     private ApiService apiService;
+    private TextView profileButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +39,7 @@ public class MainPage extends AppCompatActivity {
         addContentButton = findViewById(R.id.addContentButton);
         searchButton = findViewById(R.id.searchButton);
         darkmodeButton = findViewById(R.id.darkmodeButton);
+        profileButton = findViewById(R.id.profileButton);
         // Set default fragment
         homePageFragment = new HomePageFragment();
         loadFragment(homePageFragment);
@@ -54,9 +57,17 @@ public class MainPage extends AppCompatActivity {
         if (isLoggedIn) {
             loginButton.setVisibility(View.GONE); // Hide login button if logged in
             signoutButton.setVisibility(View.VISIBLE); // Show sign-out button if logged in
+            // Set profile button
+            String currentUser = sharedPreferences.getString("currentUser", "");
+            if (!currentUser.isEmpty()) {
+                String initial = String.valueOf(currentUser.charAt(0)).toUpperCase();
+                profileButton.setText(initial);
+                profileButton.setVisibility(View.VISIBLE); // Show profile button if logged in
+            }
         } else {
             loginButton.setVisibility(View.VISIBLE); // Show login button if not logged in
             signoutButton.setVisibility(View.GONE); // Hide sign-out button if not logged in
+            profileButton.setVisibility(View.GONE); // Hide profile button if not logged in
         }
         signoutButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,6 +83,15 @@ public class MainPage extends AppCompatActivity {
                 // Update UI after sign-out
                 loginButton.setVisibility(View.VISIBLE);
                 signoutButton.setVisibility(View.GONE);
+                profileButton.setVisibility(View.GONE);
+            }
+        });
+
+        profileButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to ProfileActivity
+                startActivity(new Intent(MainPage.this, ProfileActivity.class));
             }
         });
 

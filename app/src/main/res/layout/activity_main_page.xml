@@ -75,7 +75,7 @@
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="0.5" />
 
         <ImageButton
             android:id="@+id/loginButton"
@@ -100,7 +100,7 @@
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="0.5" />
 
         <ImageButton
             android:id="@+id/addContentButton"
@@ -116,7 +116,7 @@
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="0.5" />
 
         <ImageButton
             android:id="@+id/homepageButton"
@@ -127,12 +127,31 @@
             android:src="@drawable/ic_homelogo"
             android:background="?attr/selectableItemBackground"
             android:contentDescription="@string/homepage_button_desc"/>
-
-        <!-- Spacer -->
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="0.5" />
+
+        <!-- Spacer -->
+
+        <Button
+            android:id="@+id/profileButton"
+            android:layout_width="20dp"
+            android:layout_height="50dp"
+            android:layout_weight="0.5"
+            android:backgroundTint="#ADD8E6"
+            android:gravity="center"
+            android:radius="20dp"
+            android:layout_marginTop="5dp"
+            android:text="T"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5" />
 
     </LinearLayout>
 
