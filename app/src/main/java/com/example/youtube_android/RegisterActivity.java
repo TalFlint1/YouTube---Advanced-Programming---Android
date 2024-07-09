@@ -3,16 +3,20 @@ package com.example.youtube_android;
 import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,8 +25,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
+import androidx.lifecycle.ViewModelProvider;
 import com.example.youtubeandroid.R;
+
+import java.io.ByteArrayOutputStream;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -36,6 +42,8 @@ public class RegisterActivity extends AppCompatActivity {
     private ImageView imagePreview;
     private ImageView passwordHelpIcon;
     private TextView passwordTooltip;
+    private RegisterViewModel registerViewModel;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,6 +86,25 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
+        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        registerViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(RegisterViewModel.class);
+        registerViewModel.getRegisterResponse().observe(this, registerResponse -> {
+            if (registerResponse != null) {
+                String token = registerResponse.getToken();
+                String profilePictureUrl = registerResponse.getProfilePictureUrl();
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("jwtToken", token);
+                editor.putString("currentUser", usernameEditText.getText().toString());
+                editor.putString("profilePictureUrl", profilePictureUrl);
+                editor.putBoolean("isSignedIn", true);
+                editor.apply();
+
+                Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(RegisterActivity.this, MainPage.class));
+                finish();
+            }
+        });
+
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,9 +112,20 @@ public class RegisterActivity extends AppCompatActivity {
                 String password = passwordEditText.getText().toString();
                 String confirmPassword = confirmPasswordEditText.getText().toString();
                 String name = nameEditText.getText().toString();
+                String profilePictureBase64 = null;
+                if (imagePreview.getDrawable() != null) {
+                    Bitmap profilePicture = ((BitmapDrawable) imagePreview.getDrawable()).getBitmap();
+                    Bitmap resizedProfilePicture = resizeBitmap(profilePicture, 200, 200); // Resize the bitmap to 200x200
+                    profilePictureBase64 = convertBitmapToBase64(resizedProfilePicture);
+                    Toast.makeText(RegisterActivity.this, "hola"
+                            , Toast.LENGTH_SHORT).show();
+                }
+//                Bitmap profilePicture = imagePreview.getDrawable() != null ? ((BitmapDrawable) imagePreview.getDrawable()).getBitmap() : null;
 
                 if (validateFields(username, password, confirmPassword, name)) {
                     // Save the user data using SharedPreferences
+                    RegisterRequest registerRequest = new RegisterRequest(username, password, name, profilePictureBase64);
+                    registerViewModel.register(registerRequest);
                     Toast.makeText(RegisterActivity.this, "Registration successful!"
                             , Toast.LENGTH_SHORT).show();
 
@@ -110,6 +148,28 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    // Method to resize the Bitmap
+    private Bitmap resizeBitmap(Bitmap original, int maxWidth, int maxHeight) {
+        int width = original.getWidth();
+        int height = original.getHeight();
+        float bitmapRatio = (float) width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxWidth;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxHeight;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(original, width, height, true);
+    }
+
+    private String convertBitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 
     private void showPictureDialog() {

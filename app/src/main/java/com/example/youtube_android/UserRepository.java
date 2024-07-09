@@ -60,8 +60,10 @@ public class UserRepository {
             public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     RegisterResponse registerResponse = response.body();
+                    String profilePictureUrl = registerResponse.getProfilePictureUrl();
                     // Save user data to SharedPreferences
                     saveToken(registerResponse.getToken());
+                    saveProfilePicture(profilePictureUrl);
                     // Pass the register response to ViewModel
                     callback.onRegisterResponse(registerResponse);
                 } else {
