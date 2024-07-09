@@ -77,6 +77,7 @@ public class MainPage extends AppCompatActivity {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.remove("jwtToken");
                 editor.remove("currentUser");
+                editor.remove("currentPass");
                 editor.putBoolean("isSignedIn", false);
                 editor.apply();
 
@@ -90,8 +91,8 @@ public class MainPage extends AppCompatActivity {
         profileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navigate to ProfileActivity
-                startActivity(new Intent(MainPage.this, ProfileActivity.class));
+                Intent intent = new Intent(MainPage.this, ProfileActivity.class);
+                startActivity(intent);
             }
         });
 

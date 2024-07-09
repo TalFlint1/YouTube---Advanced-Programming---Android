@@ -95,6 +95,7 @@ public class RegisterActivity extends AppCompatActivity {
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("jwtToken", token);
                 editor.putString("currentUser", usernameEditText.getText().toString());
+                editor.putString("currentPass", passwordEditText.getText().toString());
                 editor.putString("profilePictureUrl", profilePictureUrl);
                 editor.putBoolean("isSignedIn", true);
                 editor.apply();
