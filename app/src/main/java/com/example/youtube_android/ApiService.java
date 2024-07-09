@@ -6,6 +6,7 @@ import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -21,8 +22,8 @@ public interface ApiService {
     @PATCH("/api/users/{id}")
     Call<User> updateUser(@Path("id") String userId, @Body User user);
 
-    @DELETE("/api/users/{id}")
-    Call<Void> deleteUser(@Path("id") String userId);
+    @DELETE("/api/users/{username}")
+    Call<Void> deleteUser(@Header("Authorization") String token, @Path("username") String username);
 
     @GET("/api/users/{id}/videos")
     Call<List<Video>> getUserVideos(@Path("id") String userId);

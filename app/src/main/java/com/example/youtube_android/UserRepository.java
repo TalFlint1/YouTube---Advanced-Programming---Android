@@ -83,6 +83,41 @@ public class UserRepository {
         });
     }
 
+    // Method to perform delete user operation
+    public void deleteUser(String username, final DeleteUserCallback callback) {
+        String token = sharedPreferences.getString("jwtToken", "");
+        String authHeader = "Bearer " + token;
+        apiService.deleteUser(authHeader, username).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    // Clear user data from SharedPreferences
+                    clearUserData();
+                    // Pass the success response to ViewModel
+                    callback.onDeleteUserResponse();
+                } else {
+                    // Handle other HTTP error codes
+                    String errorMessage = "Failed to delete account: " + response.message();
+                    Log.e("UserRepository", errorMessage);
+                    callback.onDeleteUserError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                String errorMessage = "Network error. Please try again later.";
+                Log.e("UserRepository", errorMessage, t);
+                callback.onDeleteUserError(errorMessage);
+            }
+        });
+    }
+
+    // Method to clear user data from SharedPreferences
+    private void clearUserData() {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.apply();
+    }
 
     // Method to save token to SharedPreferences
     public void saveToken(String token) {
@@ -114,5 +149,11 @@ public class UserRepository {
     public interface RegisterCallback {
         void onRegisterResponse(RegisterResponse response);
         void onRegisterError(String errorMessage);
+    }
+
+    // Interface to handle delete user callback
+    public interface DeleteUserCallback {
+        void onDeleteUserResponse();
+        void onDeleteUserError(String errorMessage);
     }
 }
