@@ -1,6 +1,7 @@
 package com.example.youtube_android;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.JsonReader;
 import android.util.Log;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class HomePageFragment extends Fragment implements RecyclerViewInterface {
+    private VideoRepository repository;
 
     private RecyclerView videoRecyclerView;
     private VideoAdapter videoAdapter;
@@ -35,6 +37,8 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home_page, container, false);
+// Initialize UserRepository
+        repository = new VideoRepository();
 
         // Initialize the RecyclerView and Search Bar
         videoRecyclerView = view.findViewById(R.id.video_recycler_view);
@@ -74,57 +78,79 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
     }
 
     private void loadJsonData() {
-        try {
-            InputStream inputStream = getResources().openRawResource(R.raw.data); // Ensure you have a data.json file in res/raw folder
-            JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            reader.beginArray();
+        repository.getAllVideos( new VideoRepository.GetVideosCallback() {
 
-            while (reader.hasNext()) {
-                reader.beginObject();
+            @Override
+            public void onGetVideosResponse(List<Video> response) {
+                for (Video item : response) {
+                    System.out.println("Element: " + item);
+                    videoList.add(item);
+                    filteredVideoList.add(item); // Initially, show all videos
 
-                String title = null;
-                String username = null;
-                String views = null;
-                String time = null;
-                String videoUrl = null;
-
-                while (reader.hasNext()) {
-                    String name = reader.nextName();
-                    switch (name) {
-                        case "title":
-                            title = reader.nextString();
-                            break;
-                        case "username":
-                            username = reader.nextString();
-                            break;
-                        case "views":
-                            views = reader.nextString();
-                            break;
-                        case "time":
-                            time = reader.nextString();
-                            break;
-                        case "video_url":
-                            videoUrl = reader.nextString();
-                            break;
-                        default:
-                            reader.skipValue();
-                            break;
-                    }
                 }
-                Video videoItem = new Video(title, username, views, time, videoUrl, 0);
-                videoList.add(videoItem);
-                filteredVideoList.add(videoItem); // Initially, show all videos
-                reader.endObject();
+                Log.i("response:  ", response.toString());
+                System.out.println( response);
+                videoAdapter.notifyDataSetChanged();
+
             }
-            reader.endArray();
-            reader.close();
 
-            videoAdapter.notifyDataSetChanged();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(TAG, "Error loading data", e);
-        }
+            @Override
+            public void onGetVideosError(String errorMessage) {
+                // Handle error
+                //android.widget.Toast.makeText(Hom.this, "Failed to delete account: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+            }
+        });
+//        try {
+//            InputStream inputStream = getResources().openRawResource(R.raw.data); // Ensure you have a data.json file in res/raw folder
+//            JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+//            reader.beginArray();
+//
+//            while (reader.hasNext()) {
+//                reader.beginObject();
+//
+//                String title = null;
+//                String username = null;
+//                String views = null;
+//                String time = null;
+//                String videoUrl = null;
+//
+//                while (reader.hasNext()) {
+//                    String name = reader.nextName();
+//                    switch (name) {
+//                        case "title":
+//                            title = reader.nextString();
+//                            break;
+//                        case "username":
+//                            username = reader.nextString();
+//                            break;
+//                        case "views":
+//                            views = reader.nextString();
+//                            break;
+//                        case "time":
+//                            time = reader.nextString();
+//                            break;
+//                        case "video_url":
+//                            videoUrl = reader.nextString();
+//                            break;
+//                        default:
+//                            reader.skipValue();
+//                            break;
+//                    }
+//                }
+//                Video videoItem = new Video(title, username, views, time, videoUrl, 0);
+//                videoList.add(videoItem);
+//                filteredVideoList.add(videoItem); // Initially, show all videos
+//                reader.endObject();
+//            }
+//            reader.endArray();
+//            reader.close();
+//
+//            videoAdapter.notifyDataSetChanged();
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            Log.e(TAG, "Error loading data", e);
+//        }
     }
 
     private void filterVideos(String query) {
