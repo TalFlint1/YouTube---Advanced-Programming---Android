@@ -1,3 +1,6 @@
+
+
+
 package com.example.youtube_android;
 
 import android.annotation.SuppressLint;
@@ -117,8 +120,42 @@ public class VideoPage extends AppCompatActivity {
                     isLiked = false;
                     likeButton.setImageResource(R.drawable.basic_l); // Change to regular like icon
                 }
+                repository.GetVideo( video,new VideoRepository.GetVideoCallback() {
+
+
+                    @Override
+                    public void onGetVideoResponse(Video response) {
+                        video = response;
+                        video.setLikes(likeCount);
+                        video.setLiked(isLiked);
+                        repository.UpdateVideo( video,new VideoRepository.UpdateVideosCallback() {
+
+                            @Override
+                            public void onUpdateVideosResponse(Video response) {
+
+                                Log.i("response:  ", response.toString());
+                                System.out.println( response);
+
+                            }
+
+                            @Override
+                            public void onUpdateVideosError(String errorMessage) {
+                                // Handle error
+                                //android.widget.Toast.makeText(Hom.this, "Failed to delete account: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
+                    }
+
+                    @Override
+                    public void onGetVideoError(String errorMessage) {
+
+                    }
+                });
+
                 likeButton.setContentDescription("" + likeCount + " likes");
                 likes.setText("" + likeCount + " לייקים"); // Update the displayed like count
+
             }
         });
 

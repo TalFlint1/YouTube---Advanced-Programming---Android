@@ -12,18 +12,20 @@ public class Video {
     private String videoUrl;
     private int likeCount;
     private int id;
+    private boolean liked;
     private List<Comment> comments;
 
     public Video(String title, String owner, String views, String time, String videoUrl, int likeCount) {
         this.title = title;
         this.owner = owner;
         this.views = views;
+        this.liked =false;
         this.time_publish = time;
         this.thumbnailUrl = videoUrl;
         this.videoUrl = videoUrl;
         this.likeCount = likeCount;
         this.comments = new  ArrayList<>();
-        }
+    }
 
     public Video(String title, String owner, String views, String time, String videoUrl, int likeCount, int id) {
         this.title = title;
@@ -34,6 +36,7 @@ public class Video {
         this.videoUrl = videoUrl;
         this.id = id;
         this.comments = new  ArrayList<>();
+        this.liked =false;
     }
 
     public String getTitle() {
@@ -48,6 +51,12 @@ public class Video {
     }
     public void addComment(Comment c) {
         this.comments.add(c);
+    }
+    public void setLiked(boolean liked) {
+        this.liked = liked;
+    }
+    public void setLikes(int likes) {
+        this.likeCount = likes;
     }
 
     public String getViews() {
