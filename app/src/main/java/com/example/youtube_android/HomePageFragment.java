@@ -83,7 +83,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
             @Override
             public void onGetVideosResponse(List<Video> response) {
                 for (Video item : response) {
-                    System.out.println("Element: " + item);
+                    Log.i("response:  ", item.toString());
                     videoList.add(item);
                     filteredVideoList.add(item); // Initially, show all videos
 
@@ -100,57 +100,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
                 //android.widget.Toast.makeText(Hom.this, "Failed to delete account: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
             }
         });
-//        try {
-//            InputStream inputStream = getResources().openRawResource(R.raw.data); // Ensure you have a data.json file in res/raw folder
-//            JsonReader reader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-//            reader.beginArray();
-//
-//            while (reader.hasNext()) {
-//                reader.beginObject();
-//
-//                String title = null;
-//                String username = null;
-//                String views = null;
-//                String time = null;
-//                String videoUrl = null;
-//
-//                while (reader.hasNext()) {
-//                    String name = reader.nextName();
-//                    switch (name) {
-//                        case "title":
-//                            title = reader.nextString();
-//                            break;
-//                        case "username":
-//                            username = reader.nextString();
-//                            break;
-//                        case "views":
-//                            views = reader.nextString();
-//                            break;
-//                        case "time":
-//                            time = reader.nextString();
-//                            break;
-//                        case "video_url":
-//                            videoUrl = reader.nextString();
-//                            break;
-//                        default:
-//                            reader.skipValue();
-//                            break;
-//                    }
-//                }
-//                Video videoItem = new Video(title, username, views, time, videoUrl, 0);
-//                videoList.add(videoItem);
-//                filteredVideoList.add(videoItem); // Initially, show all videos
-//                reader.endObject();
-//            }
-//            reader.endArray();
-//            reader.close();
-//
-//            videoAdapter.notifyDataSetChanged();
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            Log.e(TAG, "Error loading data", e);
-//        }
     }
 
     private void filterVideos(String query) {
@@ -165,13 +114,22 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
 
     @Override
     public void onItemClick(int position) {
+
         Intent intent = new Intent(getActivity(), VideoPage.class);
         Video videoItem = filteredVideoList.get(position);
+        Log.i("videoItem" ,videoItem.toString());
+        Log.i("video_title" ,videoItem.getTitle());
+        Log.i("getUsername" ,videoItem.getUsername());
+        Log.i("getViews" ,videoItem.getViews());
+        Log.i("getTime" ,videoItem.getTime());
+        Log.i("getVideoUrl" ,videoItem.getVideoUrl());
+
         intent.putExtra("video_title", videoItem.getTitle());
         intent.putExtra("video_username", videoItem.getUsername());
         intent.putExtra("video_views", videoItem.getViews());
         intent.putExtra("video_time", videoItem.getTime());
         intent.putExtra("video_url", videoItem.getVideoUrl());
+        intent.putExtra("id", videoItem.getId());
         startActivity(intent);
     }
 

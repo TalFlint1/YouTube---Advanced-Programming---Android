@@ -55,6 +55,80 @@ public class VideoRepository {
     }
 
     // Method to perform register operation
+    public void UpdateVideo(Video video, final UpdateVideosCallback callback) {
+        Log.e("here in update func",".");
+        Log.e("here in update func",video.getUsername());
+        Log.e("here in update func", String.valueOf(video.getId()));
+        apiService.updateVideo(video.getUsername(), String.valueOf(video.getId()),video).enqueue(new Callback<Video>()
+        {
+
+            @Override
+            public void onResponse(Call<Video> call, Response<Video> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.e("here in onResponse",".");
+                    callback.onUpdateVideosResponse(response.body());
+                } else if (response.code() == 401) {
+                    String errorMessage = "Unauthorized access. Please check your credentials.";
+                    Log.e("UserRepository", errorMessage);
+                    callback.onUpdateVideosError(errorMessage);
+                } else {
+                    // Handle other HTTP error codes
+                    String errorMessage = "Failed to login: " + response.message();
+                    Log.e("UserRepository", errorMessage);
+                    callback.onUpdateVideosError(errorMessage);
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<Video> call, Throwable t) {
+                Log.e("here in onFailure",".");
+
+                String errorMessage = "Network error. Please try again later.";
+                Log.e("UserRepository", errorMessage, t);
+                callback.onUpdateVideosError(errorMessage);
+            }
+        });
+    }
+
+    public void GetVideo(Video video, final GetVideoCallback callback) {
+        Log.e("here in update func",".");
+        Log.e("here in update func",video.getUsername());
+        Log.e("here in update func", String.valueOf(video.getId()));
+        apiService.getVideo(video.getUsername(), String.valueOf(video.getId())).enqueue(new Callback<Video>()
+        {
+
+            @Override
+            public void onResponse(Call<Video> call, Response<Video> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Log.e("here in onResponse",".");
+                    callback.onGetVideoResponse(response.body());
+                } else if (response.code() == 401) {
+                    String errorMessage = "Unauthorized access. Please check your credentials.";
+                    Log.e("UserRepository", errorMessage);
+                    callback.onGetVideoError(errorMessage);
+                } else {
+                    // Handle other HTTP error codes
+                    String errorMessage = "Failed to login1: " + response.message();
+                    Log.e("UserRepository", errorMessage);
+                    callback.onGetVideoError(errorMessage);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Video> call, Throwable t) {
+                Log.e("here in onFailure",".");
+
+                String errorMessage = "Network error. Please try again later.";
+                Log.e("UserRepository", errorMessage, t);
+                callback.onGetVideoError(errorMessage);
+            }
+        });
+    }
+
+
+
+    // Method to perform register operation
     public void registerUser(RegisterRequest registerRequest, final RegisterCallback callback) {
         apiService.registerUser(registerRequest).enqueue(new Callback<RegisterResponse>() {
             @Override
@@ -144,6 +218,15 @@ public class VideoRepository {
     public interface GetVideosCallback {
         void onGetVideosResponse(List<Video> response);
         void onGetVideosError(String errorMessage);
+    }
+
+    public interface UpdateVideosCallback {
+        void onUpdateVideosResponse(Video response);
+        void onUpdateVideosError(String errorMessage);
+    }
+    public interface GetVideoCallback {
+        void onGetVideoResponse(Video response);
+        void onGetVideoError(String errorMessage);
     }
 
     // Interface to handle register callback
