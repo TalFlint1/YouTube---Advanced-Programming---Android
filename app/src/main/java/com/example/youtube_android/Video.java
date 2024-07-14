@@ -52,6 +52,9 @@ public class Video {
     public void addComment(Comment c) {
         this.comments.add(c);
     }
+    public void removeComment(int index) {
+        this.comments.remove(index);
+    }
     public void setLiked(boolean liked) {
         this.liked = liked;
     }
@@ -65,6 +68,12 @@ public class Video {
 
     public String getTime() {
         return time_publish;
+    }
+    public  List<Comment> getComments() {
+        return comments;
+    }
+    public  void setComments( List<Comment> comments) {
+        this.comments = comments;
     }
 
     public String getVideoUrl() {

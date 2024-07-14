@@ -104,7 +104,7 @@ public class VideoPage extends AppCompatActivity {
         }
 
         commentsList = new ArrayList<>();
-        commentsAdapter = new CommentsAdapter(commentsList);
+        commentsAdapter = new CommentsAdapter(commentsList, video);
         commentsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         commentsRecyclerView.setAdapter(commentsAdapter);
 
