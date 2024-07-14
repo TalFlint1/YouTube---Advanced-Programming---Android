@@ -1,12 +1,8 @@
-
-
-
 package com.example.youtube_android;
 
 import android.annotation.SuppressLint;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.JsonReader;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -15,16 +11,10 @@ import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.youtubeandroid.R;
-
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +28,7 @@ public class VideoPage extends AppCompatActivity {
 
     private RecyclerView commentsRecyclerView;
     private CommentsAdapter commentsAdapter;
-    private List<String> commentsList;
+    private List<Comment> commentsList;
     private int likeCount = 0;
     private boolean isLiked = false;
 
@@ -84,22 +74,16 @@ public class VideoPage extends AppCompatActivity {
         videoTime.setText(time);
         likes.setText("" + likeCount + " לייקים"); // Set the like count
 
-        video = new Video(title,username,views,time,videoUrl,likeCount,id);
-
+        video = new Video(title, username, views, time, videoUrl, likeCount, id);
 
         // Ensure the video URL is valid
         if (videoUrl != null && !videoUrl.isEmpty()) {
-            //Uri uri = getResourceUri(videoUrl);
             Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.v4);
             videoView.setVideoURI(uri);
             MediaController mediaController = new MediaController(this);
             videoView.setMediaController(mediaController);
             mediaController.setAnchorView(videoView);
-//            videoView.requestFocus();
-//            videoView.start();
         } else {
-            // Handle invalid video URL
-            // Show a message to the user or log the error
             videoTitle.setText("Invalid video URL");
         }
 
@@ -120,31 +104,26 @@ public class VideoPage extends AppCompatActivity {
                     isLiked = false;
                     likeButton.setImageResource(R.drawable.basic_l); // Change to regular like icon
                 }
-                repository.GetVideo( video,new VideoRepository.GetVideoCallback() {
-
+                repository.GetVideo(video, new VideoRepository.GetVideoCallback() {
 
                     @Override
                     public void onGetVideoResponse(Video response) {
                         video = response;
                         video.setLikes(likeCount);
                         video.setLiked(isLiked);
-                        repository.UpdateVideo( video,new VideoRepository.UpdateVideosCallback() {
+                        repository.UpdateVideo(video, new VideoRepository.UpdateVideosCallback() {
 
                             @Override
                             public void onUpdateVideosResponse(Video response) {
-
                                 Log.i("response:  ", response.toString());
-                                System.out.println( response);
-
+                                System.out.println(response);
                             }
 
                             @Override
                             public void onUpdateVideosError(String errorMessage) {
                                 // Handle error
-                                //android.widget.Toast.makeText(Hom.this, "Failed to delete account: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
                             }
                         });
-
                     }
 
                     @Override
@@ -155,67 +134,56 @@ public class VideoPage extends AppCompatActivity {
 
                 likeButton.setContentDescription("" + likeCount + " likes");
                 likes.setText("" + likeCount + " לייקים"); // Update the displayed like count
-
             }
         });
 
         commentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String comment = commentEditText.getText().toString();
-                if (!comment.isEmpty()) {
+                String commentText = commentEditText.getText().toString();
+                if (!commentText.isEmpty()) {
+                    Comment comment = new Comment(commentText, video.getId());
                     commentsList.add(comment);
                     commentsAdapter.notifyItemInserted(commentsList.size() - 1);
                     commentEditText.setText("");
+
+                    Log.i("comment:  ", commentText);
+                    Log.i("video:  ", video.getTitle());
+
+                    repository.GetVideo(video, new VideoRepository.GetVideoCallback() {
+
+                        @Override
+                        public void onGetVideoResponse(Video response) {
+                            video = response;
+                            video.addComment(comment);
+                            repository.UpdateVideo(video, new VideoRepository.UpdateVideosCallback() {
+
+                                @Override
+                                public void onUpdateVideosResponse(Video response) {
+                                    Log.i("response:  ", response.toString());
+                                    System.out.println(response);
+                                }
+
+                                @Override
+                                public void onUpdateVideosError(String errorMessage) {
+                                    // Handle error
+                                }
+                            });
+                        }
+
+                        @Override
+                        public void onGetVideoError(String errorMessage) {
+
+                        }
+                    });
                 }
-                Log.i("comment:  ", comment);
-                Log.i("video:  ", video.getTitle());
-                repository.GetVideo( video,new VideoRepository.GetVideoCallback() {
-
-
-                    @Override
-                    public void onGetVideoResponse(Video response) {
-                        video = response;
-                        Comment c = new Comment(comment , video.getId());
-                        video.addComment(c);
-                        repository.UpdateVideo( video,new VideoRepository.UpdateVideosCallback() {
-
-                            @Override
-                            public void onUpdateVideosResponse(Video response) {
-
-                                Log.i("response:  ", response.toString());
-                                System.out.println( response);
-
-                            }
-
-                            @Override
-                            public void onUpdateVideosError(String errorMessage) {
-                                // Handle error
-                                //android.widget.Toast.makeText(Hom.this, "Failed to delete account: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
-                            }
-                        });
-
-                    }
-
-                    @Override
-                    public void onGetVideoError(String errorMessage) {
-
-                    }
-                });
-
             }
         });
-
     }
 
     private Uri getResourceUri(String resourceName) {
-        // Get the package name
         String packageName = getPackageName();
-        // Get the resource ID from the resource name
         int resourceId = getResources().getIdentifier(resourceName, "raw", packageName);
-        // Construct the URI
-        Uri uri = Uri.parse("android.resource://" + packageName + "/" + resourceId);
-        return uri;
+        return Uri.parse("android.resource://" + packageName + "/" + resourceId);
     }
-
 }
