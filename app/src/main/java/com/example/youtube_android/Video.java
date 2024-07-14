@@ -52,6 +52,9 @@ public class Video {
     public void addComment(Comment c) {
         this.comments.add(c);
     }
+    public void updateComment(int position ,String c) {
+        this.comments.get(position).setMessage(c);
+    }
     public void removeComment(int index) {
         this.comments.remove(index);
     }

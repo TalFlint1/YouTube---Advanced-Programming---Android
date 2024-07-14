@@ -29,6 +29,9 @@ public class Comment {
     public String getMessage() {
         return text;
     }
+    public void setMessage(String text) {
+        this.text= text;
+    }
 
     public int getUserImage() {
         return userImage;
