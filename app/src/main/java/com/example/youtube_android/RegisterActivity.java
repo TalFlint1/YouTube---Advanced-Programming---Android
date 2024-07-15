@@ -118,8 +118,6 @@ public class RegisterActivity extends AppCompatActivity {
                     Bitmap profilePicture = ((BitmapDrawable) imagePreview.getDrawable()).getBitmap();
                     Bitmap resizedProfilePicture = resizeBitmap(profilePicture, 200, 200); // Resize the bitmap to 200x200
                     profilePictureBase64 = convertBitmapToBase64(resizedProfilePicture);
-                    Toast.makeText(RegisterActivity.this, "hola"
-                            , Toast.LENGTH_SHORT).show();
                 }
 //                Bitmap profilePicture = imagePreview.getDrawable() != null ? ((BitmapDrawable) imagePreview.getDrawable()).getBitmap() : null;
 

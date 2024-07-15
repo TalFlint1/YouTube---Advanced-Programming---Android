@@ -19,8 +19,8 @@ public interface ApiService {
     @GET("/api/users/{username}")
     Call<User> getUserDetails(@Path("username") String username);
 
-    @PATCH("/api/users/{id}")
-    Call<User> updateUser(@Path("id") String userId, @Body User user);
+//    @PATCH("/api/users/{username}")
+//    Call<Void> updateUser(@Header("Authorization") String token, @Body UpdateRequest updateRequest);
 
     @DELETE("/api/users/{username}")
     Call<Void> deleteUser(@Header("Authorization") String token, @Path("username") String username);
