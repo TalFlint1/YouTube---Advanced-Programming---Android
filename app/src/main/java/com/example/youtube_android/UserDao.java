@@ -13,6 +13,9 @@ public interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(UserEntity user);
 
+    @Query("SELECT * FROM user_table WHERE username = :username AND password = :password")
+    UserEntity getUserByUsernameAndPassword(String username, String password);
+
     @Query("SELECT * FROM user_table WHERE username = :username LIMIT 1")
     LiveData<UserEntity> getUser(String username);
 
