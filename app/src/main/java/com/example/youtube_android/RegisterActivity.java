@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,7 +42,8 @@ public class RegisterActivity extends AppCompatActivity {
     private Button registerButton, selectPictureButton;
     private ImageView imagePreview;
     private ImageView passwordHelpIcon;
-    private TextView passwordTooltip;
+    private TextView passwordTooltip, errorText;
+    private LinearLayout errorContainer;
     private RegisterViewModel registerViewModel;
     private SharedPreferences sharedPreferences;
 
@@ -72,6 +74,8 @@ public class RegisterActivity extends AppCompatActivity {
         imagePreview = findViewById(R.id.imagePreview);
         passwordHelpIcon = findViewById(R.id.passwordHelpIcon);
         passwordTooltip = findViewById(R.id.passwordTooltip);
+        errorContainer = findViewById(R.id.errorContainer);
+        errorText = findViewById(R.id.errorText);
 
         // Set click listener for the password help icon
         passwordHelpIcon.setOnClickListener(new View.OnClickListener() {
@@ -103,6 +107,8 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(RegisterActivity.this, MainPage.class));
                 finish();
+            } else {
+                showError("ERROR");
             }
         });
 
@@ -147,6 +153,11 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void showError(String message) {
+        errorText.setText(message);
+        errorContainer.setVisibility(View.VISIBLE);
     }
 
     // Method to resize the Bitmap

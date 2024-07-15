@@ -38,8 +38,6 @@ public class UserRepository {
                     // Save user data to SharedPreferences
                     saveToken(loginResponse.getToken());
                     saveProfilePicture(profilePictureUrl);
-                    // Log the SharedPreferences values
-//                    displaySharedPreferences();
 
                     // Save to Room database
                     UserEntity userEntity = new UserEntity(loginRequest.getUsername(), loginRequest.getPassword(), loginResponse.getToken(), profilePictureUrl);
@@ -53,19 +51,14 @@ public class UserRepository {
                         runOnUiThread(() -> callback.onLoginResponse(loginResponse));
                         Log.d("UserRepository", "User saved to Room database: " + userEntity.toString());
                     });
-
-                    // Pass the login response to ViewModel
-//                    callback.onLoginResponse(loginResponse);
                 } else if (response.code() == 401) {
                     String errorMessage = "Unauthorized access. Please check your credentials.";
                     Log.e("UserRepository", errorMessage);
                     runOnUiThread(() -> callback.onLoginError(errorMessage));
-//                    callback.onLoginError(errorMessage);
                 } else {
                     // Handle other HTTP error codes
                     String errorMessage = "Failed to login: " + response.message();
                     Log.e("UserRepository", errorMessage);
-//                    callback.onLoginError(errorMessage);
                     runOnUiThread(() -> callback.onLoginError(errorMessage));
                 }
             }
@@ -79,12 +72,10 @@ public class UserRepository {
                     if (userEntity != null) {
                         // Offline login successful
                         LoginResponse offlineLoginResponse = new LoginResponse(userEntity.getToken(), userEntity.getProfilePictureUrl());
-//                        callback.onLoginResponse(offlineLoginResponse);
                         runOnUiThread(() -> callback.onLoginResponse(offlineLoginResponse));
                     } else {
                         // Offline login failed
                         String errorMessage = "Login failed. Please try again.";
-//                        callback.onLoginError(errorMessage);
                         runOnUiThread(() -> callback.onLoginError(errorMessage));
                     }
                 });
@@ -115,23 +106,21 @@ public class UserRepository {
                     userEntity.setProfilePictureUrl(profilePictureUrl);
                     UserRoomDatabase.databaseWriteExecutor.execute(() -> {
                         userDao.insert(userEntity);
+                        runOnUiThread(() -> callback.onRegisterResponse(registerResponse));
                     });
-
-                    // Pass the register response to ViewModel
-                    callback.onRegisterResponse(registerResponse);
                 } else {
                     // Handle other HTTP error codes
                     String errorMessage = "Failed to register: " + response.message();
                     Log.e("UserRepository", errorMessage);
-                    callback.onRegisterError(errorMessage);
+                    runOnUiThread(() -> callback.onRegisterError(errorMessage));
                 }
             }
 
             @Override
             public void onFailure(Call<RegisterResponse> call, Throwable t) {
-                String errorMessage = "Network error. Please try again later.";
+                String errorMessage = "No connection. Cannot sign up";
                 Log.e("UserRepository", errorMessage, t);
-                callback.onRegisterError(errorMessage);
+                runOnUiThread(() -> callback.onRegisterError(errorMessage));
             }
         });
     }

@@ -12,9 +12,9 @@ public class RetrofitClient {
     public static ApiService getApiService() {
         if (retrofit == null) {
             OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-            httpClient.connectTimeout(3, TimeUnit.SECONDS);
-            httpClient.readTimeout(3, TimeUnit.SECONDS);
-            httpClient.writeTimeout(3, TimeUnit.SECONDS);
+            httpClient.connectTimeout(5, TimeUnit.SECONDS);
+            httpClient.readTimeout(5, TimeUnit.SECONDS);
+            httpClient.writeTimeout(5, TimeUnit.SECONDS);
             retrofit = new Retrofit.Builder()
                     .baseUrl("http://10.0.2.2:3001") // Use your server's base URL
                     .addConverterFactory(GsonConverterFactory.create())
