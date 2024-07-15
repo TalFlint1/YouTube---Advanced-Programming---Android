@@ -12,7 +12,9 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.youtubeandroid.R;
-
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import java.util.List;
 public class MainPage extends AppCompatActivity {
 
     private ImageButton homepageButton;
@@ -24,11 +26,15 @@ public class MainPage extends AppCompatActivity {
     private HomePageFragment homePageFragment;
     private ApiService apiService;
     private TextView profileButton;
+    private UserRepository userRepository;
+    private UserViewModel userViewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_page);
+        userRepository = new UserRepository(this);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
 
         // Initialize ApiService using RetrofitClient
         apiService = RetrofitClient.getApiService();
@@ -43,6 +49,20 @@ public class MainPage extends AppCompatActivity {
         // Set default fragment
         homePageFragment = new HomePageFragment();
         loadFragment(homePageFragment);
+
+        // Observe user data changes from Room
+        userViewModel.getUser().observe(this, new Observer<UserEntity>() {
+            @Override
+            public void onChanged(UserEntity userEntity) {
+                if (userEntity != null) {
+                    // Update UI based on logged-in state
+                    updateUI(userEntity.getUsername());
+                } else {
+                    // No user logged in, show default UI
+                    updateUI(null);
+                }
+            }
+        });
 
         // Load user preference for dark mode
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
@@ -155,5 +175,20 @@ public class MainPage extends AppCompatActivity {
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean("dark_mode", isDarkMode);
         editor.apply();
+    }
+
+    private void updateUI(String username) {
+        if (username != null && !username.isEmpty()) {
+            // User is logged in, update UI accordingly
+            loginButton.setVisibility(View.GONE);
+            signoutButton.setVisibility(View.VISIBLE);
+            profileButton.setText(String.valueOf(username.charAt(0)).toUpperCase());
+            profileButton.setVisibility(View.VISIBLE);
+        } else {
+            // User is not logged in, show default UI
+            loginButton.setVisibility(View.VISIBLE);
+            signoutButton.setVisibility(View.GONE);
+            profileButton.setVisibility(View.GONE);
+        }
     }
 }

@@ -3,6 +3,8 @@ package com.example.youtube_android;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import java.util.List;
+import androidx.lifecycle.LiveData;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -11,10 +13,16 @@ import retrofit2.Response;
 public class UserRepository {
     private ApiService apiService;
     private SharedPreferences sharedPreferences;
+    private UserDao userDao;
+    private LiveData<UserEntity> user;
+    private Context context;
 
     public UserRepository(Context context) {
         apiService = RetrofitClient.getApiService();
         sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        UserRoomDatabase db = UserRoomDatabase.getDatabase(context);
+        userDao = db.userDao();
+        this.context = context;
     }
 
     // Method to perform login operation
@@ -29,7 +37,20 @@ public class UserRepository {
                     saveToken(loginResponse.getToken());
                     saveProfilePicture(profilePictureUrl);
                     // Log the SharedPreferences values
-                    displaySharedPreferences();
+//                    displaySharedPreferences();
+
+                    // Save to Room database
+                    UserEntity userEntity = new UserEntity(loginRequest.getUsername(), loginRequest.getPassword(), loginResponse.getToken(), profilePictureUrl);
+                    userEntity.setUsername(loginRequest.getUsername());
+                    userEntity.setToken(loginResponse.getToken());
+                    userEntity.setProfilePictureUrl(profilePictureUrl);
+                    // Log user entity details
+                    Log.d("UserRepository", "Saving user to Room database: " + userEntity.toString());
+                    UserRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        userDao.insert(userEntity);
+                        Log.d("UserRepository", "User saved to Room database: " + userEntity.toString());
+                    });
+
                     // Pass the login response to ViewModel
                     callback.onLoginResponse(loginResponse);
                 } else if (response.code() == 401) {
@@ -64,6 +85,16 @@ public class UserRepository {
                     // Save user data to SharedPreferences
                     saveToken(registerResponse.getToken());
                     saveProfilePicture(profilePictureUrl);
+
+                    // Save to Room database
+                    UserEntity userEntity = new UserEntity(registerRequest.getUsername(), registerRequest.getPassword(), registerResponse.getToken(), profilePictureUrl);
+                    userEntity.setUsername(registerRequest.getUsername());
+                    userEntity.setToken(registerResponse.getToken());
+                    userEntity.setProfilePictureUrl(profilePictureUrl);
+                    UserRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        userDao.insert(userEntity);
+                    });
+
                     // Pass the register response to ViewModel
                     callback.onRegisterResponse(registerResponse);
                 } else {
@@ -93,6 +124,10 @@ public class UserRepository {
                 if (response.isSuccessful()) {
                     // Clear user data from SharedPreferences
                     clearUserData();
+                    // Clear user data from Room database for the specific user
+                    UserRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        userDao.deleteByUsername(username);
+                    });
                     // Pass the success response to ViewModel
                     callback.onDeleteUserResponse();
                 } else {
@@ -110,6 +145,16 @@ public class UserRepository {
                 callback.onDeleteUserError(errorMessage);
             }
         });
+    }
+
+    // Method to fetch user data from Room
+    public LiveData<UserEntity> getUserFromRoom() {
+        Log.d("UserRepository", "Retrieving user from Room");
+        return userDao.getUser(getLoggedInUsername());
+    }
+    // Helper method to get logged in username from SharedPreferences
+    private String getLoggedInUsername() {
+        return sharedPreferences.getString("currentUser", "");
     }
 
     // Method to clear user data from SharedPreferences
