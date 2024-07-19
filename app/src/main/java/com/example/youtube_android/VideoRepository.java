@@ -240,5 +240,4 @@ public class VideoRepository {
         void onDeleteUserResponse();
         void onDeleteUserError(String errorMessage);
     }
-
 }

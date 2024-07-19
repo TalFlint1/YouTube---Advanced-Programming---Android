@@ -1,6 +1,5 @@
 package com.example.youtube_android;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -18,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.youtubeandroid.R;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +50,6 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
         // Initialize the video list and adapter
         videoList = new ArrayList<>();
         filteredVideoList = new ArrayList<>();
-        Context c = getContext();
         videoAdapter = new VideoAdapter(getContext(), filteredVideoList, this);
 
         // Attach the adapter to the RecyclerView
@@ -123,20 +120,16 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
         Log.i("videoItem" ,videoItem.toString());
         Log.i("video_title" ,videoItem.getTitle());
         Log.i("getUsername" ,videoItem.getUsername());
-        Log.i("getViews" , String.valueOf(videoItem.getViews()));
+        Log.i("getViews" ,videoItem.getViews());
         Log.i("getTime" ,videoItem.getTime());
         Log.i("getVideoUrl" ,videoItem.getVideoUrl());
 
         intent.putExtra("video_title", videoItem.getTitle());
         intent.putExtra("video_username", videoItem.getUsername());
-        intent.putExtra("video_views", String.valueOf(videoItem.getViews()));
+        intent.putExtra("video_views", videoItem.getViews());
         intent.putExtra("video_time", videoItem.getTime());
-        intent.putExtra("video_time_type", videoItem.getTime_type());
         intent.putExtra("video_url", videoItem.getVideoUrl());
         intent.putExtra("id", videoItem.getId());
-        Log.e("here",";");
-        intent.putExtra("comments_list", (Serializable) videoItem.getComments());
-
         startActivity(intent);
     }
 
