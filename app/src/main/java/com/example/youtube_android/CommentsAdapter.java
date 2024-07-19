@@ -29,6 +29,11 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
         this.repository = new VideoRepository();
         this.video = video;
     }
+    public CommentsAdapter( List<String> commentsList) {
+//        this.context = context;
+        this.commentsList = commentsList;
+        this.repository = new VideoRepository();
+    }
 
     @NonNull
     @Override

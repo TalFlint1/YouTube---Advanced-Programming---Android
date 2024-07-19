@@ -1,8 +1,9 @@
 package com.example.youtube_android;
 
 import java.util.List;
+import java.io.Serializable;
 
-public class Comment {
+public class Comment implements Serializable {
     private String text;
     private int likes;
     private int videoId;

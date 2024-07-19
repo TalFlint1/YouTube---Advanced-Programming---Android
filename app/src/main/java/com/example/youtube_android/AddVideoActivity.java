@@ -68,6 +68,8 @@ public class AddVideoActivity extends AppCompatActivity {
                 String title = titleEditText.getText().toString();
 
                 if (validateFields(title, selectedVideoUri)) {
+                    Video newVideo = new Video(title,"user",0,"0",selectedVideoUri.getPath(),0);
+
                     // Handle video upload logic here
                     Toast.makeText(AddVideoActivity.this, "Video added successfully!", Toast.LENGTH_SHORT).show();
 

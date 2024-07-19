@@ -42,7 +42,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         Video videoItem = videoList.get(position);
         holder.title.setText(videoItem.getTitle());
         holder.username.setText(videoItem.getUsername());
-        holder.views.setText(videoItem.getViews());
+        holder.views.setText(String.valueOf(videoItem.getViews()));
+        //   holder.time_type.setText(videoItem.getTime_type());
         holder.time.setText(videoItem.getTime());
 
         // Set up the VideoView
@@ -67,7 +68,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
     }
 
     public static class VideoViewHolder extends RecyclerView.ViewHolder {
-        TextView title, username, views, time;
+        TextView title, username, views, time, time_type;
         VideoView videoView;
         ImageView userIcon;
 

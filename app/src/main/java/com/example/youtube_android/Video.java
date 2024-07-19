@@ -5,17 +5,21 @@ import java.util.List;
 
 public class Video {
     private String title;
-    private String owner;
-    private String views;
-    private String time_publish;
-    private String thumbnailUrl;
+    private String description;
     private String videoUrl;
+    private String thumbnailUrl;
+    private String duration;
+    private String owner;
+    private int views;
+    private String time_publish;
+    private String time_type;
+    private String user_icon;
     private int likeCount;
     private int id;
     private boolean liked;
     private List<Comment> comments;
 
-    public Video(String title, String owner, String views, String time, String videoUrl, int likeCount) {
+    public Video(String title, String owner, int views, String time, String videoUrl, int likeCount) {
         this.title = title;
         this.owner = owner;
         this.views = views;
@@ -27,7 +31,7 @@ public class Video {
         this.comments = new  ArrayList<>();
     }
 
-    public Video(String title, String owner, String views, String time, String videoUrl, int likeCount, int id) {
+    public Video(String title, String owner, int views, String time, String videoUrl, int likeCount, int id) {
         this.title = title;
         this.owner = owner;
         this.views = views;
@@ -64,9 +68,15 @@ public class Video {
     public void setLikes(int likes) {
         this.likeCount = likes;
     }
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getViews() {
+    public int getViews() {
         return views;
+    }
+    public String getTime_type() {
+        return time_type;
     }
 
     public String getTime() {
