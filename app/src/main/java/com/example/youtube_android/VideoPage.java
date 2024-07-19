@@ -346,21 +346,29 @@ public class VideoPage extends AppCompatActivity {
                 Log.i("video:  ", vid.getTitle());
 
                 repository.GetVideo(vid, new VideoRepository.GetVideoCallback() {
-
                     @Override
                     public void onGetVideoResponse(Video response) {
                         vid = response;
                         Comment comment = new Comment(commentText, vid.getId());
                         vid.addComment(comment);
                         repository.UpdateVideo(vid, new VideoRepository.UpdateVideosCallback() {
-
                             @Override
                             public void onUpdateVideosResponse(Video response) {
                                 Log.i("response:  ", response.toString());
                                 System.out.println(response);
-                                commentsList.add(comment);
-                                commentsAdapter.notifyItemInserted(commentsList.size() - 1);
+
+                                // Add the comment to the list and notify the adapter
+                                commentsList.add(new Comment(commentText,vid.getId()));  // Make sure to add the comment text, not the Comment object
+                                //commentsAdapter.notifyItemInserted(commentsList.size() - 1);
                                 commentEditText.setText("");
+
+                                List<String> commentsTextList = commentsList.stream()
+                                        .map(Comment::getMessage) // Assuming getText returns the text property of the comment
+                                        .collect(Collectors.toList());
+                                // Set up RecyclerView for comments
+                                commentsAdapter = new CommentsAdapter(commentsTextList, vid);
+                                commentsRecyclerView.setAdapter(commentsAdapter);
+
                             }
 
                             @Override
@@ -372,11 +380,10 @@ public class VideoPage extends AppCompatActivity {
 
                     @Override
                     public void onGetVideoError(String errorMessage) {
-
+                        // Handle error
                     }
                 });
             }
-
         });
     }
 
