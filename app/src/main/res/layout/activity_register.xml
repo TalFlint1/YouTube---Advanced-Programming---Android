@@ -197,6 +197,32 @@
                         android:layout_marginBottom="5dp" />
                 </LinearLayout>
 
+                <!-- Error message TextView -->
+                <LinearLayout
+                    android:id="@+id/errorContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:visibility="gone"
+                    android:layout_marginBottom="15dp">
+
+                    <ImageView
+                        android:id="@+id/errorIcon"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:src="@drawable/ic_error"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/errorText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ff0000"
+                        android:text="Sign up failed." />
+
+                </LinearLayout>
+
                 <Button
                     android:id="@+id/registerButton"
                     android:layout_width="140dp"

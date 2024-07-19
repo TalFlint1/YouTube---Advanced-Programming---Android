@@ -40,7 +40,6 @@ public class UserRepository {
                     // Handle other HTTP error codes
                     String errorMessage = "Failed to login: " + response.message();
                     Log.e("UserRepository", errorMessage);
-
                     callback.onLoginError(errorMessage);
                 }
             }
