@@ -64,6 +64,9 @@ public class Video {
     public void setLikes(int likes) {
         this.likeCount = likes;
     }
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public String getViews() {
         return views;

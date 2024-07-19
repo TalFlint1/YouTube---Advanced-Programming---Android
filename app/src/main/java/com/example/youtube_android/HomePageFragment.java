@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.youtubeandroid.R;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,6 +124,7 @@ public class HomePageFragment extends Fragment implements RecyclerViewInterface 
         Log.i("getViews" ,videoItem.getViews());
         Log.i("getTime" ,videoItem.getTime());
         Log.i("getVideoUrl" ,videoItem.getVideoUrl());
+        intent.putExtra("comments_list", (Serializable) videoItem.getComments());
 
         intent.putExtra("video_title", videoItem.getTitle());
         intent.putExtra("video_username", videoItem.getUsername());
