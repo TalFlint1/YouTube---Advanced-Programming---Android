@@ -127,65 +127,42 @@ public class VideoRepository {
     }
 
 
+    public void CreateVideo(Video video, final CreateVideosCallback callback) {
+        Log.e("here in create func",".");
+        Log.e("here in create func",video.getUsername());
+        Log.e("here in create func", String.valueOf(video.getId()));
+        apiService.createVideo(video.getUsername(), video).enqueue(new Callback<Video>()
+        {
 
-    // Method to perform register operation
-    public void registerUser(RegisterRequest registerRequest, final RegisterCallback callback) {
-        apiService.registerUser(registerRequest).enqueue(new Callback<RegisterResponse>() {
             @Override
-            public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
+            public void onResponse(Call<Video> call, Response<Video> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    RegisterResponse registerResponse = response.body();
-                    String profilePictureUrl = registerResponse.getProfilePictureUrl();
-                    // Save user data to SharedPreferences
-                    saveToken(registerResponse.getToken());
-                    saveProfilePicture(profilePictureUrl);
-                    // Pass the register response to ViewModel
-                    callback.onRegisterResponse(registerResponse);
+                    Log.e("here in onResponse",".");
+                    callback.onCreateVideosResponse(response.body());
+                } else if (response.code() == 401) {
+                    String errorMessage = "Unauthorized access. Please check your credentials.";
+                    Log.e("UserRepository", errorMessage);
+                    callback.onCreateVideosError(errorMessage);
                 } else {
                     // Handle other HTTP error codes
-                    String errorMessage = "Failed to register: " + response.message();
+                    String errorMessage = "Failed to login1: " + response.message();
                     Log.e("UserRepository", errorMessage);
-                    callback.onRegisterError(errorMessage);
+                    callback.onCreateVideosError(errorMessage);
                 }
             }
 
             @Override
-            public void onFailure(Call<RegisterResponse> call, Throwable t) {
+            public void onFailure(Call<Video> call, Throwable t) {
+                Log.e("here in onFailure",".");
+
                 String errorMessage = "Network error. Please try again later.";
                 Log.e("UserRepository", errorMessage, t);
-                callback.onRegisterError(errorMessage);
+                callback.onCreateVideosError(errorMessage);
             }
         });
     }
 
-    // Method to perform delete user operation
-    public void deleteUser(String username, final DeleteUserCallback callback) {
-        String token = sharedPreferences.getString("jwtToken", "");
-        String authHeader = "Bearer " + token;
-        apiService.deleteUser(authHeader, username).enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    // Clear user data from SharedPreferences
-                    clearUserData();
-                    // Pass the success response to ViewModel
-                    callback.onDeleteUserResponse();
-                } else {
-                    // Handle other HTTP error codes
-                    String errorMessage = "Failed to delete account: " + response.message();
-                    Log.e("UserRepository", errorMessage);
-                    callback.onDeleteUserError(errorMessage);
-                }
-            }
 
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                String errorMessage = "Network error. Please try again later.";
-                Log.e("UserRepository", errorMessage, t);
-                callback.onDeleteUserError(errorMessage);
-            }
-        });
-    }
 
     // Method to clear user data from SharedPreferences
     private void clearUserData() {
@@ -223,6 +200,10 @@ public class VideoRepository {
     public interface UpdateVideosCallback {
         void onUpdateVideosResponse(Video response);
         void onUpdateVideosError(String errorMessage);
+    }
+    public interface CreateVideosCallback {
+        void onCreateVideosResponse(Video response);
+        void onCreateVideosError(String errorMessage);
     }
     public interface GetVideoCallback {
         void onGetVideoResponse(Video response);

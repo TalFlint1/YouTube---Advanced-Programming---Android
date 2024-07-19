@@ -10,6 +10,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +27,8 @@ import androidx.core.content.ContextCompat;
 import com.example.youtubeandroid.R;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AddVideoActivity extends AppCompatActivity {
 
@@ -33,6 +36,7 @@ public class AddVideoActivity extends AppCompatActivity {
     private static final int REQUEST_PICK_VIDEO = 2;
     private static final int CAMERA_PERMISSION_CODE = 101;
     private static final int GALLERY_PERMISSION_CODE = 102;
+    private VideoRepository repository;
 
     private EditText titleEditText;
     private Button addVideoButton, selectVideoButton;
@@ -43,7 +47,7 @@ public class AddVideoActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_video);
-
+        repository = new VideoRepository();
         // Find the close button
         ImageButton closeButton = findViewById(R.id.closeButton);
 
@@ -69,8 +73,20 @@ public class AddVideoActivity extends AppCompatActivity {
 
                 if (validateFields(title, selectedVideoUri)) {
                     // Handle video upload logic here
+                    Video newItem = new Video(title,"me","0","0",selectedVideoUri.getPath(),0);
                     Toast.makeText(AddVideoActivity.this, "Video added successfully!", Toast.LENGTH_SHORT).show();
+                    repository.CreateVideo(newItem, new VideoRepository.CreateVideosCallback() {
+                        @Override
+                        public void onCreateVideosResponse(Video response) {
+                            Log.i("ok","ok");
 
+                        }
+
+                        @Override
+                        public void onCreateVideosError(String errorMessage) {
+                            // Handle error
+                        }
+                    });
                     startActivity(new Intent(AddVideoActivity.this, MainPage.class));
                     finish(); // Finish the current activity to prevent going back to this page
                 }

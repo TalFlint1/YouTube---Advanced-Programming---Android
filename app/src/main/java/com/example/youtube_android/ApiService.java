@@ -28,8 +28,7 @@ public interface ApiService {
 
     @GET("/api/users/{id}/videos")
     Call<List<Video>> getUserVideos(@Path("id") String userId);
-
-    @POST("/api/users/{id}/videos")
+    @POST("/api/videos/user/:{id}/videos")
     Call<Video> createVideo(@Path("id") String userId, @Body Video video);
 
     @GET("/api/videos/user/:{id}/video/{pid}")
