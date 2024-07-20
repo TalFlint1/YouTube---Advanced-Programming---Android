@@ -8,6 +8,8 @@ import android.util.Log;
 import java.util.List;
 import androidx.lifecycle.LiveData;
 
+import org.json.JSONObject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -52,9 +54,22 @@ public class UserRepository {
                         Log.d("UserRepository", "User saved to Room database: " + userEntity.toString());
                     });
                 } else if (response.code() == 401) {
-                    String errorMessage = "Unauthorized access. Please check your credentials.";
-                    Log.e("UserRepository", errorMessage);
-                    runOnUiThread(() -> callback.onLoginError(errorMessage));
+                    // Extract error message from response body, if available
+                    final String[] errorMessage = new String[1];
+                    errorMessage[0] = "Unauthorized access. Please check your credentials.";
+                    if (response.errorBody() != null) {
+                        try {
+                            String errorBody = response.errorBody().string();
+                            // You may need to parse the error body based on your server response format
+                            // Example: if the server sends JSON with an "error" field
+                            JSONObject errorJson = new JSONObject(errorBody);
+                            errorMessage[0] = errorJson.optString("error", errorMessage[0]);
+                        } catch (Exception e) {
+                            Log.e("UserRepository", "Error parsing error body", e);
+                        }
+                    }
+                    Log.e("UserRepository", errorMessage[0]);
+                    runOnUiThread(() -> callback.onLoginError(errorMessage[0]));
                 } else {
                     // Handle other HTTP error codes
                     String errorMessage = "Failed to login: " + response.message();
