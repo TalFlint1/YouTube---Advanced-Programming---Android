@@ -1,5 +1,7 @@
 package com.example.youtube_android;
-
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import java.util.List;
 import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -37,8 +39,10 @@ public class AddVideoActivity extends AppCompatActivity {
     private static final int CAMERA_PERMISSION_CODE = 101;
     private static final int GALLERY_PERMISSION_CODE = 102;
     private VideoRepository repository;
-
+    private UserRepository userRepository;
+    private UserViewModel userViewModel;
     private EditText titleEditText;
+    private String userName;
     private Button addVideoButton, selectVideoButton;
     private ImageView videoPreview;
     private Uri selectedVideoUri;
@@ -48,9 +52,19 @@ public class AddVideoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_video);
         repository = new VideoRepository();
+        userRepository = new UserRepository(this);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         // Find the close button
         ImageButton closeButton = findViewById(R.id.closeButton);
-
+        userViewModel.getUser().observe(this, new Observer<UserEntity>() {
+            @Override
+            public void onChanged(UserEntity userEntity) {
+                if (userEntity != null) {
+                    userName= userEntity.getUsername();
+                    // Update UI based on logged-in state
+                }
+            }
+        });
         // Set click listener for the close button
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -73,7 +87,7 @@ public class AddVideoActivity extends AppCompatActivity {
 
                 if (validateFields(title, selectedVideoUri)) {
                     // Handle video upload logic here
-                    Video newItem = new Video(title,"me","0","0",selectedVideoUri.getPath(),0);
+                    Video newItem = new Video(title,userName,"0","0",selectedVideoUri.getPath(),0);
                     Toast.makeText(AddVideoActivity.this, "Video added successfully!", Toast.LENGTH_SHORT).show();
                     repository.CreateVideo(newItem, new VideoRepository.CreateVideosCallback() {
                         @Override
