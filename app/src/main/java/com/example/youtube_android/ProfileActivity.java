@@ -40,6 +40,7 @@ public class ProfileActivity extends AppCompatActivity {
         TextView passText = findViewById(R.id.passText);
         ImageView profileImage = findViewById(R.id.profileImage);
         Button deleteAccountButton = findViewById(R.id.deleteButton);
+        TextView errorText = findViewById(R.id.errorText);
 
         SharedPreferences sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
 
@@ -114,8 +115,10 @@ public class ProfileActivity extends AppCompatActivity {
 
             @Override
             public void onDeleteUserError(String errorMessage) {
-                // Handle error
-                android.widget.Toast.makeText(ProfileActivity.this, "Failed to delete account: " + errorMessage, android.widget.Toast.LENGTH_SHORT).show();
+                // Display error message in red
+                TextView errorText = findViewById(R.id.errorText);
+                errorText.setText(errorMessage);
+                errorText.setVisibility(View.VISIBLE);
             }
         });
     }
