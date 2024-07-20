@@ -2,7 +2,13 @@ package com.example.youtube_android;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import java.util.List;
+import androidx.lifecycle.LiveData;
+
+import org.json.JSONObject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -11,10 +17,16 @@ import retrofit2.Response;
 public class UserRepository {
     private ApiService apiService;
     private SharedPreferences sharedPreferences;
+    private UserDao userDao;
+    private LiveData<UserEntity> user;
+    private Context context;
 
     public UserRepository(Context context) {
         apiService = RetrofitClient.getApiService();
         sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        UserRoomDatabase db = UserRoomDatabase.getDatabase(context);
+        userDao = db.userDao();
+        this.context = context;
     }
 
     // Method to perform login operation
@@ -28,29 +40,66 @@ public class UserRepository {
                     // Save user data to SharedPreferences
                     saveToken(loginResponse.getToken());
                     saveProfilePicture(profilePictureUrl);
-                    // Log the SharedPreferences values
-                    displaySharedPreferences();
-                    // Pass the login response to ViewModel
-                    callback.onLoginResponse(loginResponse);
+
+                    // Save to Room database
+                    UserEntity userEntity = new UserEntity(loginRequest.getUsername(), loginRequest.getPassword(), loginResponse.getToken(), profilePictureUrl);
+                    userEntity.setUsername(loginRequest.getUsername());
+                    userEntity.setToken(loginResponse.getToken());
+                    userEntity.setProfilePictureUrl(profilePictureUrl);
+                    // Log user entity details
+                    Log.d("UserRepository", "Saving user to Room database: " + userEntity.toString());
+                    UserRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        userDao.insert(userEntity);
+                        runOnUiThread(() -> callback.onLoginResponse(loginResponse));
+                        Log.d("UserRepository", "User saved to Room database: " + userEntity.toString());
+                    });
                 } else if (response.code() == 401) {
-                    String errorMessage = "Unauthorized access. Please check your credentials.";
-                    Log.e("UserRepository", errorMessage);
-                    callback.onLoginError(errorMessage);
+                    // Extract error message from response body, if available
+                    final String[] errorMessage = new String[1];
+                    errorMessage[0] = "Unauthorized access. Please check your credentials.";
+                    if (response.errorBody() != null) {
+                        try {
+                            String errorBody = response.errorBody().string();
+                            // You may need to parse the error body based on your server response format
+                            // Example: if the server sends JSON with an "error" field
+                            JSONObject errorJson = new JSONObject(errorBody);
+                            errorMessage[0] = errorJson.optString("error", errorMessage[0]);
+                        } catch (Exception e) {
+                            Log.e("UserRepository", "Error parsing error body", e);
+                        }
+                    }
+                    Log.e("UserRepository", errorMessage[0]);
+                    runOnUiThread(() -> callback.onLoginError(errorMessage[0]));
                 } else {
                     // Handle other HTTP error codes
                     String errorMessage = "Failed to login: " + response.message();
                     Log.e("UserRepository", errorMessage);
-                    callback.onLoginError(errorMessage);
+                    runOnUiThread(() -> callback.onLoginError(errorMessage));
                 }
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                String errorMessage = "Network error. Please try again later.";
-                Log.e("UserRepository", errorMessage, t);
-                callback.onLoginError(errorMessage);
+                Log.e("UserRepository", "Network error. Attempting offline login.", t);
+                // Network error, attempt to login using Room database
+                UserRoomDatabase.databaseWriteExecutor.execute(() -> {
+                    UserEntity userEntity = userDao.getUserByUsernameAndPassword(loginRequest.getUsername(), loginRequest.getPassword());
+                    if (userEntity != null) {
+                        // Offline login successful
+                        LoginResponse offlineLoginResponse = new LoginResponse(userEntity.getToken(), userEntity.getProfilePictureUrl());
+                        runOnUiThread(() -> callback.onLoginResponse(offlineLoginResponse));
+                    } else {
+                        // Offline login failed
+                        String errorMessage = "Login failed. Please try again.";
+                        runOnUiThread(() -> callback.onLoginError(errorMessage));
+                    }
+                });
             }
         });
+    }
+    // Helper method to run code on the main UI thread
+    private void runOnUiThread(Runnable action) {
+        new Handler(Looper.getMainLooper()).post(action);
     }
 
     // Method to perform register operation
@@ -64,21 +113,29 @@ public class UserRepository {
                     // Save user data to SharedPreferences
                     saveToken(registerResponse.getToken());
                     saveProfilePicture(profilePictureUrl);
-                    // Pass the register response to ViewModel
-                    callback.onRegisterResponse(registerResponse);
+
+                    // Save to Room database
+                    UserEntity userEntity = new UserEntity(registerRequest.getUsername(), registerRequest.getPassword(), registerResponse.getToken(), profilePictureUrl);
+                    userEntity.setUsername(registerRequest.getUsername());
+                    userEntity.setToken(registerResponse.getToken());
+                    userEntity.setProfilePictureUrl(profilePictureUrl);
+                    UserRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        userDao.insert(userEntity);
+                        runOnUiThread(() -> callback.onRegisterResponse(registerResponse));
+                    });
                 } else {
                     // Handle other HTTP error codes
                     String errorMessage = "Failed to register: " + response.message();
                     Log.e("UserRepository", errorMessage);
-                    callback.onRegisterError(errorMessage);
+                    runOnUiThread(() -> callback.onRegisterError(errorMessage));
                 }
             }
 
             @Override
             public void onFailure(Call<RegisterResponse> call, Throwable t) {
-                String errorMessage = "Network error. Please try again later.";
+                String errorMessage = "No connection. Cannot sign up";
                 Log.e("UserRepository", errorMessage, t);
-                callback.onRegisterError(errorMessage);
+                runOnUiThread(() -> callback.onRegisterError(errorMessage));
             }
         });
     }
@@ -93,6 +150,10 @@ public class UserRepository {
                 if (response.isSuccessful()) {
                     // Clear user data from SharedPreferences
                     clearUserData();
+                    // Clear user data from Room database for the specific user
+                    UserRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        userDao.deleteByUsername(username);
+                    });
                     // Pass the success response to ViewModel
                     callback.onDeleteUserResponse();
                 } else {
@@ -110,6 +171,16 @@ public class UserRepository {
                 callback.onDeleteUserError(errorMessage);
             }
         });
+    }
+
+    // Method to fetch user data from Room
+    public LiveData<UserEntity> getUserFromRoom() {
+        Log.d("UserRepository", "Retrieving user from Room");
+        return userDao.getUser(getLoggedInUsername());
+    }
+    // Helper method to get logged in username from SharedPreferences
+    private String getLoggedInUsername() {
+        return sharedPreferences.getString("currentUser", "");
     }
 
     // Method to clear user data from SharedPreferences
