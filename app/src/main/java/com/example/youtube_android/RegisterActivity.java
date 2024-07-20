@@ -42,7 +42,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Button registerButton, selectPictureButton;
     private ImageView imagePreview;
     private ImageView passwordHelpIcon;
-    private TextView passwordTooltip, errorText;
+    private TextView passwordTooltip, errorText, profilePicErrorTextView;
     private LinearLayout errorContainer;
     private RegisterViewModel registerViewModel;
     private SharedPreferences sharedPreferences;
@@ -69,6 +69,7 @@ public class RegisterActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.password);
         confirmPasswordEditText = findViewById(R.id.confirmPassword);
         nameEditText = findViewById(R.id.name);
+        profilePicErrorTextView = findViewById(R.id.profilePicErrorTextView);
         registerButton = findViewById(R.id.registerButton);
         selectPictureButton = findViewById(R.id.selectPictureButton);
         imagePreview = findViewById(R.id.imagePreview);
@@ -108,7 +109,13 @@ public class RegisterActivity extends AppCompatActivity {
                 startActivity(new Intent(RegisterActivity.this, MainPage.class));
                 finish();
             } else {
-                showError("ERROR");
+                showError("No connection. Cannot sign up");
+            }
+        });
+        // Observe error messages
+        registerViewModel.getErrorMessage().observe(this, errorMessage -> {
+            if (errorMessage != null && !errorMessage.isEmpty()) {
+                showError(errorMessage);
             }
         });
 
@@ -125,17 +132,14 @@ public class RegisterActivity extends AppCompatActivity {
                     Bitmap resizedProfilePicture = resizeBitmap(profilePicture, 200, 200); // Resize the bitmap to 200x200
                     profilePictureBase64 = convertBitmapToBase64(resizedProfilePicture);
                 }
-//                Bitmap profilePicture = imagePreview.getDrawable() != null ? ((BitmapDrawable) imagePreview.getDrawable()).getBitmap() : null;
 
-                if (validateFields(username, password, confirmPassword, name)) {
+                if (validateFields(username, password, confirmPassword, name, profilePictureBase64)) {
                     // Save the user data using SharedPreferences
                     RegisterRequest registerRequest = new RegisterRequest(username, password, name, profilePictureBase64);
                     registerViewModel.register(registerRequest);
                     Toast.makeText(RegisterActivity.this, "Registration successful!"
                             , Toast.LENGTH_SHORT).show();
 
-                    startActivity(new Intent(RegisterActivity.this, MainPage.class));
-                    finish(); // Finish the current activity to prevent going back to the registration page
                 }
             }
         });
@@ -240,7 +244,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private boolean validateFields(String username, String password, String confirmPassword, String name) {
+    private boolean validateFields(String username, String password, String confirmPassword, String name, String profilePic) {
         boolean isValid = true;
 
         // Check if any field is empty and display error messages accordingly
@@ -260,6 +264,12 @@ public class RegisterActivity extends AppCompatActivity {
         if (name.isEmpty()) {
             nameEditText.setError("Name is required");
             isValid = false;
+        }
+        if (profilePic == null) {
+            profilePicErrorTextView.setVisibility(View.VISIBLE); // Show the error message
+            isValid = false;
+        } else {
+            profilePicErrorTextView.setVisibility(View.GONE); // Hide the error message if valid
         }
         // Check if passwords match
         if (!password.equals(confirmPassword)) {

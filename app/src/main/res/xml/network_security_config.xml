@@ -4,6 +4,6 @@
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
         <domain includeSubdomains="true">10.0.2.2</domain>
-        <!-- Add other domains as needed for cleartext traffic -->
+        <domain includeSubdomains="true">192.168.1.5</domain> <!-- Replace with the actual IP -->
     </domain-config>
 </network-security-config>
