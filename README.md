@@ -3,6 +3,7 @@
 
 ## Overview
 
+
 This project continues the development of an Android application inspired by YouTube. 
 The application interacts with a Node.js server using MongoDB for user and video functionalities. 
 When there is no connection to the server, the application operates locally using Room with SQLite for data storage.
