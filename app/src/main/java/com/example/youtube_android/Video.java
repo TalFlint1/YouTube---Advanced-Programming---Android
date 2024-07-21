@@ -83,7 +83,7 @@ public class Video {
     }
 
     public String getVideoUrl() {
-        return thumbnailUrl;
+        return videoUrl;
     }
 
     public int getLikeCount() {
