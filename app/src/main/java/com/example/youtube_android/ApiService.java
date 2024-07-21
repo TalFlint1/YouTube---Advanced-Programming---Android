@@ -9,6 +9,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.PATCH;
 import retrofit2.http.POST;
+import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import java.util.List;
 
@@ -27,14 +28,13 @@ public interface ApiService {
 
     @GET("/api/users/{id}/videos")
     Call<List<Video>> getUserVideos(@Path("id") String userId);
-
-    @POST("/api/users/{id}/videos")
+    @POST("/api/videos/user/:{id}/videos")
     Call<Video> createVideo(@Path("id") String userId, @Body Video video);
 
-    @GET("/api/users/{id}/videos/{pid}")
+    @GET("/api/videos/user/:{id}/video/{pid}")
     Call<Video> getVideo(@Path("id") String userId, @Path("pid") String videoId);
 
-    @PATCH("/api/users/{id}/videos/{pid}")
+    @PUT("/api/videos/user/{id}/videos/{pid}")
     Call<Video> updateVideo(@Path("id") String userId, @Path("pid") String videoId, @Body Video video);
 
     @DELETE("/api/users/{id}/videos/{pid}")

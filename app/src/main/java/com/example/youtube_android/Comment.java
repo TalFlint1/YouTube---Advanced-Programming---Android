@@ -1,19 +1,57 @@
 package com.example.youtube_android;
 
-public class Comment {
-    private String message;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.io.Serializable;
+
+public class Comment implements Serializable {
+    private String text;
+    private int likes;
+    private int videoId;
+    private List<Comment> replies;
     private int userImage;
 
-    public Comment(String message, int userImage) {
-        this.message = message;
+    public Comment(String message, int userImage, int videoId) {
+        this.text = message;
+        this.likes = 0;
         this.userImage = userImage;
+        this.videoId = videoId;
+        this.replies = new ArrayList<>();
+    }
+
+    public Comment(String message, int videoId) {
+        this.text = message;
+        this.likes = 0;
+        this.userImage = 0;
+        this.videoId = videoId;
+        this.replies = new ArrayList<>();
     }
 
     public String getMessage() {
-        return message;
+        return text;
+    }
+    public void setMessage(String text) {
+        this.text= text;
     }
 
     public int getUserImage() {
         return userImage;
+    }
+
+    public List<Comment> getReplies() {
+        return replies;
+    }
+
+    public void addReply(Comment reply) {
+        replies.add(reply);
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
     }
 }
