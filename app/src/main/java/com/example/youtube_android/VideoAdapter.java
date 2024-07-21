@@ -1,6 +1,7 @@
 package com.example.youtube_android;
 
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -45,6 +46,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         holder.views.setText(videoItem.getViews());
         holder.time.setText(videoItem.getTime());
 
+
+
         // Set up the VideoView
         Uri videoUri = Uri.parse(videoItem.getVideoUrl());
         holder.videoView.setVideoURI(videoUri);
@@ -52,7 +55,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         holder.videoView.setMediaController(mediaController);
         holder.videoView.setOnPreparedListener(mp -> {
             // Start playing the video
-            //    holder.videoView.start();
+            holder.videoView.start();
+            mp.setVolume(0f,0f);
+
         });
 
         holder.videoView.setOnErrorListener((mp, what, extra) -> {

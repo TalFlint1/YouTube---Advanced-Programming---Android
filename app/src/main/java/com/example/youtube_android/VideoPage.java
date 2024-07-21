@@ -309,15 +309,15 @@ public class VideoPage extends AppCompatActivity {
         likes.setText(likeCount + " לייקים");
 
         // Ensure the video URL is valid
-//        if (videoUrl != null && !videoUrl.isEmpty()) {
-//            Uri uri = Uri.parse(videoUrl);
-//            videoView.setVideoURI(uri);
-//            MediaController mediaController = new MediaController(this);
-//            videoView.setMediaController(mediaController);
-//            mediaController.setAnchorView(videoView);
-//        } else {
-//            videoTitle.setText("Invalid video URL");
-//        }
+        if (videoUrl != null && !videoUrl.isEmpty()) {
+            Uri uri = Uri.parse(videoUrl);
+            videoView.setVideoURI(uri);
+            MediaController mediaController = new MediaController(this);
+            videoView.setMediaController(mediaController);
+            mediaController.setAnchorView(videoView);
+        } else {
+            videoTitle.setText("Invalid video URL");
+        }
         List<String> commentsTextList = commentsList.stream()
                 .map(Comment::getMessage) // Assuming getText returns the text property of the comment
                 .collect(Collectors.toList());
