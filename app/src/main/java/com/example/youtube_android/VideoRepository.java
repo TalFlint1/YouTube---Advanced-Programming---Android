@@ -57,9 +57,8 @@ public class VideoRepository {
                     callback.onGetVideosError(errorMessage);
                 }
             }
-            private void runOnUiThread(Runnable action) {
-                new Handler(Looper.getMainLooper()).post(action);
-            }public List<Video> parseVideoEntitiesToVideos(List<VideoEntity> videoEntities) {
+
+            public List<Video> parseVideoEntitiesToVideos(List<VideoEntity> videoEntities) {
                 List<Video> videos = new ArrayList<>();
                 for (VideoEntity entity : videoEntities) {
                     Video video = new Video(
@@ -169,34 +168,37 @@ public class VideoRepository {
         });
     }
 
-    // Method to create a new video in API and Room
     public void createVideo(Video video, final CreateVideosCallback callback) {
+        // First, add the video to the API
         apiService.createVideo(video.getUsername(), video).enqueue(new Callback<Video>() {
             @Override
             public void onResponse(Call<Video> call, Response<Video> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     Video createdVideo = response.body();
                     VideoEntity videoEntity = new VideoEntity();
-                     videoEntity.setId(String.valueOf(createdVideo.getId()));
+                    videoEntity.setId(String.valueOf(createdVideo.getId()));
                     videoEntity.setTitle(createdVideo.getTitle());
                     videoEntity.setUsername(createdVideo.getUsername());
                     videoEntity.setViews(Integer.parseInt(createdVideo.getViews()));
                     videoEntity.setTime(createdVideo.getTime());
                     videoEntity.setVideoUrl(createdVideo.getVideoUrl());
 
+                    // Insert the video into Room database
                     VideoRoomDatabase.databaseWriteExecutor.execute(() -> {
                         videoDao.insert(videoEntity);
-                        callback.onCreateVideosResponse(createdVideo);
+
+                        // Notify callback with the created video
+                        runOnUiThread(() -> callback.onCreateVideosResponse(createdVideo));
                     });
                 } else if (response.code() == 401) {
                     String errorMessage = "Unauthorized access. Please check your credentials.";
                     Log.e("VideoRepository", errorMessage);
-                    callback.onCreateVideosError(errorMessage);
+                    runOnUiThread(() -> callback.onCreateVideosError(errorMessage));
                 } else {
                     // Handle other HTTP error codes
                     String errorMessage = "Failed to create video: " + response.message();
                     Log.e("VideoRepository", errorMessage);
-                    callback.onCreateVideosError(errorMessage);
+                    runOnUiThread(() -> callback.onCreateVideosError(errorMessage));
                 }
             }
 
@@ -204,7 +206,7 @@ public class VideoRepository {
             public void onFailure(Call<Video> call, Throwable t) {
                 String errorMessage = "Network error. Please try again later.";
                 Log.e("VideoRepository", errorMessage, t);
-                callback.onCreateVideosError(errorMessage);
+                runOnUiThread(() -> callback.onCreateVideosError(errorMessage));
             }
         });
     }
@@ -228,5 +230,8 @@ public class VideoRepository {
     public interface GetVideoCallback {
         void onGetVideoResponse(Video response);
         void onGetVideoError(String errorMessage);
+    }
+    private void runOnUiThread(Runnable action) {
+        new Handler(Looper.getMainLooper()).post(action);
     }
 }
