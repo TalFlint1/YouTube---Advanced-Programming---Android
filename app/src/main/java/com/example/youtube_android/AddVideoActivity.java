@@ -87,7 +87,12 @@ public class AddVideoActivity extends AppCompatActivity {
 
                 if (validateFields(title, selectedVideoUri)) {
                     // Handle video upload logic here
-                    Video newItem = new Video(title,userName,"0","0",selectedVideoUri.getPath(),0);
+                    Video newItem = null;
+                    try {
+                        newItem = new Video(title,userName,"0","0",getRealPathFromUri(selectedVideoUri),0);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     Toast.makeText(AddVideoActivity.this, "Video added successfully!", Toast.LENGTH_SHORT).show();
                     repository.CreateVideo(newItem, new VideoRepository.CreateVideosCallback() {
                         @Override
@@ -175,35 +180,8 @@ public class AddVideoActivity extends AppCompatActivity {
         }
     }
 
-    private void setVideoPreview(Uri videoUri) {
-        try {
-            Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(getRealPathFromUri(videoUri), MediaStore.Video.Thumbnails.MINI_KIND);
-            if (thumbnail != null) {
-                videoPreview.setImageBitmap(thumbnail);
-                videoPreview.setVisibility(View.VISIBLE);
-            } else {
-                Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    // Helper method to get the real path from URI (for Android 10 and above)
-    private String getRealPathFromUri(Uri uri) throws IOException {
-        String realPath;
-        if (uri.getScheme().equals("content")) {
-            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-                    realPath = cursor.getString(index);
-                    return realPath;
-                }
-            }
-        }
-        return uri.getPath();
-    }
+
 
     private boolean validateFields(String title, Uri videoUri) {
         boolean isValid = true;
@@ -236,5 +214,36 @@ public class AddVideoActivity extends AppCompatActivity {
                 Toast.makeText(this, "Gallery permission denied", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void setVideoPreview(Uri videoUri) {
+        try {
+            Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(getRealPathFromUri(videoUri), MediaStore.Video.Thumbnails.MINI_KIND);
+            if (thumbnail != null) {
+                videoPreview.setImageBitmap(thumbnail);
+                videoPreview.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+    private String getRealPathFromUri(Uri uri) throws IOException {
+        String realPath;
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                    realPath = cursor.getString(index);
+                    return realPath;
+                }
+            }
+        }
+        return uri.getPath();
     }
 }
