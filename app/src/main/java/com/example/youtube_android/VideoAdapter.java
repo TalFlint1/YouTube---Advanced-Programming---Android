@@ -52,7 +52,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoViewHol
         holder.videoView.setMediaController(mediaController);
         holder.videoView.setOnPreparedListener(mp -> {
             // Start playing the video
-            holder.videoView.start();
+            //    holder.videoView.start();
         });
 
         holder.videoView.setOnErrorListener((mp, what, extra) -> {
