@@ -3,16 +3,21 @@ package com.example.youtube_android;
 import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Base64;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,8 +26,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
+import androidx.lifecycle.ViewModelProvider;
 import com.example.youtubeandroid.R;
+
+import java.io.ByteArrayOutputStream;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -35,7 +42,10 @@ public class RegisterActivity extends AppCompatActivity {
     private Button registerButton, selectPictureButton;
     private ImageView imagePreview;
     private ImageView passwordHelpIcon;
-    private TextView passwordTooltip;
+    private TextView passwordTooltip, errorText, profilePicErrorTextView;
+    private LinearLayout errorContainer;
+    private RegisterViewModel registerViewModel;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,7 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate back to the main page (MainActivity)
-                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                startActivity(new Intent(RegisterActivity.this, MainPage.class));
                 finish(); // Finish the current activity to prevent going back to the registration page
             }
         });
@@ -59,11 +69,14 @@ public class RegisterActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.password);
         confirmPasswordEditText = findViewById(R.id.confirmPassword);
         nameEditText = findViewById(R.id.name);
+        profilePicErrorTextView = findViewById(R.id.profilePicErrorTextView);
         registerButton = findViewById(R.id.registerButton);
         selectPictureButton = findViewById(R.id.selectPictureButton);
         imagePreview = findViewById(R.id.imagePreview);
         passwordHelpIcon = findViewById(R.id.passwordHelpIcon);
         passwordTooltip = findViewById(R.id.passwordTooltip);
+        errorContainer = findViewById(R.id.errorContainer);
+        errorText = findViewById(R.id.errorText);
 
         // Set click listener for the password help icon
         passwordHelpIcon.setOnClickListener(new View.OnClickListener() {
@@ -78,6 +91,34 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
+        sharedPreferences = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        registerViewModel = new ViewModelProvider(this, ViewModelProvider.AndroidViewModelFactory.getInstance(getApplication())).get(RegisterViewModel.class);
+        registerViewModel.getRegisterResponse().observe(this, registerResponse -> {
+            if (registerResponse != null) {
+                String token = registerResponse.getToken();
+                String profilePictureUrl = registerResponse.getProfilePictureUrl();
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString("jwtToken", token);
+                editor.putString("currentUser", usernameEditText.getText().toString());
+                editor.putString("currentPass", passwordEditText.getText().toString());
+                editor.putString("profilePictureUrl", profilePictureUrl);
+                editor.putBoolean("isSignedIn", true);
+                editor.apply();
+
+                Toast.makeText(RegisterActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(RegisterActivity.this, MainPage.class));
+                finish();
+            } else {
+                showError("No connection. Cannot sign up");
+            }
+        });
+        // Observe error messages
+        registerViewModel.getErrorMessage().observe(this, errorMessage -> {
+            if (errorMessage != null && !errorMessage.isEmpty()) {
+                showError(errorMessage);
+            }
+        });
+
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,14 +126,20 @@ public class RegisterActivity extends AppCompatActivity {
                 String password = passwordEditText.getText().toString();
                 String confirmPassword = confirmPasswordEditText.getText().toString();
                 String name = nameEditText.getText().toString();
+                String profilePictureBase64 = null;
+                if (imagePreview.getDrawable() != null) {
+                    Bitmap profilePicture = ((BitmapDrawable) imagePreview.getDrawable()).getBitmap();
+                    Bitmap resizedProfilePicture = resizeBitmap(profilePicture, 200, 200); // Resize the bitmap to 200x200
+                    profilePictureBase64 = convertBitmapToBase64(resizedProfilePicture);
+                }
 
-                if (validateFields(username, password, confirmPassword, name)) {
+                if (validateFields(username, password, confirmPassword, name, profilePictureBase64)) {
                     // Save the user data using SharedPreferences
+                    RegisterRequest registerRequest = new RegisterRequest(username, password, name, profilePictureBase64);
+                    registerViewModel.register(registerRequest);
                     Toast.makeText(RegisterActivity.this, "Registration successful!"
                             , Toast.LENGTH_SHORT).show();
 
-                    startActivity(new Intent(RegisterActivity.this, MainActivity.class));
-                    finish(); // Finish the current activity to prevent going back to the registration page
                 }
             }
         });
@@ -110,6 +157,33 @@ public class RegisterActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void showError(String message) {
+        errorText.setText(message);
+        errorContainer.setVisibility(View.VISIBLE);
+    }
+
+    // Method to resize the Bitmap
+    private Bitmap resizeBitmap(Bitmap original, int maxWidth, int maxHeight) {
+        int width = original.getWidth();
+        int height = original.getHeight();
+        float bitmapRatio = (float) width / (float) height;
+        if (bitmapRatio > 1) {
+            width = maxWidth;
+            height = (int) (width / bitmapRatio);
+        } else {
+            height = maxHeight;
+            width = (int) (height * bitmapRatio);
+        }
+        return Bitmap.createScaledBitmap(original, width, height, true);
+    }
+
+    private String convertBitmapToBase64(Bitmap bitmap) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 
     private void showPictureDialog() {
@@ -170,7 +244,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    private boolean validateFields(String username, String password, String confirmPassword, String name) {
+    private boolean validateFields(String username, String password, String confirmPassword, String name, String profilePic) {
         boolean isValid = true;
 
         // Check if any field is empty and display error messages accordingly
@@ -190,6 +264,12 @@ public class RegisterActivity extends AppCompatActivity {
         if (name.isEmpty()) {
             nameEditText.setError("Name is required");
             isValid = false;
+        }
+        if (profilePic == null) {
+            profilePicErrorTextView.setVisibility(View.VISIBLE); // Show the error message
+            isValid = false;
+        } else {
+            profilePicErrorTextView.setVisibility(View.GONE); // Hide the error message if valid
         }
         // Check if passwords match
         if (!password.equals(confirmPassword)) {

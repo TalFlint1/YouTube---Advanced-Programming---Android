@@ -1,5 +1,7 @@
 package com.example.youtube_android;
-
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
+import java.util.List;
 import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
@@ -10,6 +12,7 @@ import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +29,8 @@ import androidx.core.content.ContextCompat;
 import com.example.youtubeandroid.R;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class AddVideoActivity extends AppCompatActivity {
 
@@ -33,8 +38,11 @@ public class AddVideoActivity extends AppCompatActivity {
     private static final int REQUEST_PICK_VIDEO = 2;
     private static final int CAMERA_PERMISSION_CODE = 101;
     private static final int GALLERY_PERMISSION_CODE = 102;
-
+    private VideoRepository repository;
+    private UserRepository userRepository;
+    private UserViewModel userViewModel;
     private EditText titleEditText;
+    private String userName;
     private Button addVideoButton, selectVideoButton;
     private ImageView videoPreview;
     private Uri selectedVideoUri;
@@ -43,16 +51,26 @@ public class AddVideoActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_video);
-
+        repository = new VideoRepository(this);
+        userRepository = new UserRepository(this);
+        userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         // Find the close button
         ImageButton closeButton = findViewById(R.id.closeButton);
-
+        userViewModel.getUser().observe(this, new Observer<UserEntity>() {
+            @Override
+            public void onChanged(UserEntity userEntity) {
+                if (userEntity != null) {
+                    userName= userEntity.getUsername();
+                    // Update UI based on logged-in state
+                }
+            }
+        });
         // Set click listener for the close button
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Navigate back to the main page (MainActivity)
-                startActivity(new Intent(AddVideoActivity.this, MainActivity.class));
+                startActivity(new Intent(AddVideoActivity.this, MainPage.class));
                 finish(); // Finish the current activity to prevent going back to this page
             }
         });
@@ -69,9 +87,26 @@ public class AddVideoActivity extends AppCompatActivity {
 
                 if (validateFields(title, selectedVideoUri)) {
                     // Handle video upload logic here
+                    Video newItem = null;
+                    try {
+                        newItem = new Video(title,userName,"0","0",getRealPathFromUri(selectedVideoUri),0);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                     Toast.makeText(AddVideoActivity.this, "Video added successfully!", Toast.LENGTH_SHORT).show();
+                    repository.createVideo(newItem, new VideoRepository.CreateVideosCallback() {
+                        @Override
+                        public void onCreateVideosResponse(Video response) {
+                            Log.i("ok","ok");
 
-                    startActivity(new Intent(AddVideoActivity.this, MainActivity.class));
+                        }
+
+                        @Override
+                        public void onCreateVideosError(String errorMessage) {
+                            // Handle error
+                        }
+                    });
+                    startActivity(new Intent(AddVideoActivity.this, MainPage.class));
                     finish(); // Finish the current activity to prevent going back to this page
                 }
             }
@@ -145,35 +180,8 @@ public class AddVideoActivity extends AppCompatActivity {
         }
     }
 
-    private void setVideoPreview(Uri videoUri) {
-        try {
-            Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(getRealPathFromUri(videoUri), MediaStore.Video.Thumbnails.MINI_KIND);
-            if (thumbnail != null) {
-                videoPreview.setImageBitmap(thumbnail);
-                videoPreview.setVisibility(View.VISIBLE);
-            } else {
-                Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    // Helper method to get the real path from URI (for Android 10 and above)
-    private String getRealPathFromUri(Uri uri) throws IOException {
-        String realPath;
-        if (uri.getScheme().equals("content")) {
-            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-                    realPath = cursor.getString(index);
-                    return realPath;
-                }
-            }
-        }
-        return uri.getPath();
-    }
+
 
     private boolean validateFields(String title, Uri videoUri) {
         boolean isValid = true;
@@ -206,5 +214,36 @@ public class AddVideoActivity extends AppCompatActivity {
                 Toast.makeText(this, "Gallery permission denied", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void setVideoPreview(Uri videoUri) {
+        try {
+            Bitmap thumbnail = ThumbnailUtils.createVideoThumbnail(getRealPathFromUri(videoUri), MediaStore.Video.Thumbnails.MINI_KIND);
+            if (thumbnail != null) {
+                videoPreview.setImageBitmap(thumbnail);
+                videoPreview.setVisibility(View.VISIBLE);
+            } else {
+                Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Failed to load video thumbnail", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+
+    private String getRealPathFromUri(Uri uri) throws IOException {
+        String realPath;
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+                    realPath = cursor.getString(index);
+                    return realPath;
+                }
+            }
+        }
+        return uri.getPath();
     }
 }

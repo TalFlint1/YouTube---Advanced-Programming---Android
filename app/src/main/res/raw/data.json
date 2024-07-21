@@ -1,10 +1,58 @@
-{
-  "title": "android video",
-  "username": "כאן חדשות",
-  "time": "before 12 hours",
-  "views": "views: 3",
-  "video_url": "http://www.example.com/path/to/your/video.mp4",
-  "likeCount": 5,
-  "comments": ["Great video!","wow"]
-
-}
+[
+  {
+    "title": "Unboxing a new foldable phone",
+    "username": "Gadget Guru",
+    "time": "1 day ago",
+    "views": "7,245 views",
+    "video_url": "v4"
+  },
+  {
+    "title": "Mastering the new camera features",
+    "username": "Android Photography School",
+    "time": "2 days ago",
+    "views": "18,432 views",
+    "video_url": "v4"
+  },
+  {
+    "title": "Top productivity apps for Android",
+    "username": "Apps for Life",
+    "time": "3 days ago",
+    "views": "9,782 views",
+    "video_url": "v4"
+  },
+  {
+    "title": "Is your phone secure? Top security tips",
+    "username": "Tech Talk with Sarah",
+    "time": "4 days ago",
+    "views": "14,251 views",
+    "video_url": "v4"
+  },
+  {
+    "title": "Must-have accessories for your Android device",
+    "username": "The Mobile Corner",
+    "time": "1 week ago",
+    "views": "21,873 views",
+    "video_url": "v4"
+  },
+  {
+    "title": "Android Auto: A driving companion guide",
+    "username": "Cars & Tech",
+    "time": "1 week ago",
+    "views": "10,342 views",
+    "video_url": "v4"
+  },
+  {
+    "title": "Funniest Android fails compilation",
+    "username": "Blooper Theater",
+    "time": "2 weeks ago",
+    "views": "42,781 views",
+    "video_url": "v4"
+  },
+  {
+    "title": "5 hidden features you didn't know about",
+    "username": "Android Hacks",
+    "time": "2 weeks ago",
+    "views": "25,143 views",
+    "video_url": "v4"
+  }
+]

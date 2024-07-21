@@ -16,8 +16,6 @@
             android:orientation="vertical"
             android:gravity="center">
 
-
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -182,7 +180,7 @@
                     <ImageView
                         android:id="@+id/imagePreview"
                         android:layout_width="100dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="100dp"
                         android:layout_gravity="center"
                         android:layout_marginBottom="2dp"
                         android:visibility="gone" />
@@ -195,6 +193,41 @@
                         android:backgroundTint="#ff0000"
                         android:textColor="#ffffff"
                         android:layout_marginBottom="5dp" />
+
+                    <TextView
+                        android:id="@+id/profilePicErrorTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@android:color/holo_red_dark"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        android:text="Profile picture is required"/>
+                </LinearLayout>
+
+                <!-- Error message TextView -->
+                <LinearLayout
+                    android:id="@+id/errorContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:visibility="gone"
+                    android:layout_marginBottom="15dp">
+
+                    <ImageView
+                        android:id="@+id/errorIcon"
+                        android:layout_width="34dp"
+                        android:layout_height="34dp"
+                        android:src="@drawable/ic_error"
+                        android:layout_marginEnd="8dp" />
+
+                    <TextView
+                        android:id="@+id/errorText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#ff0000"
+                        android:text="Sign up failed." />
+
                 </LinearLayout>
 
                 <Button
