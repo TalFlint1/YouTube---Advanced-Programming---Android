@@ -274,7 +274,7 @@ public class VideoPage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.video_page);
-        repository = new VideoRepository();
+        repository = new VideoRepository(this);
         videoView = findViewById(R.id.video_view);
         likeButton = findViewById(R.id.like_button);
         commentEditText = findViewById(R.id.comment_edit_text);
@@ -345,13 +345,13 @@ public class VideoPage extends AppCompatActivity {
                 Log.i("comment:  ", commentText);
                 Log.i("video:  ", vid.getTitle());
 
-                repository.GetVideo(vid, new VideoRepository.GetVideoCallback() {
+                repository.getVideo(vid, new VideoRepository.GetVideoCallback() {
                     @Override
                     public void onGetVideoResponse(Video response) {
                         vid = response;
                         Comment comment = new Comment(commentText, vid.getId());
                         vid.addComment(comment);
-                        repository.UpdateVideo(vid, new VideoRepository.UpdateVideosCallback() {
+                        repository.updateVideo(vid, new VideoRepository.UpdateVideosCallback() {
                             @Override
                             public void onUpdateVideosResponse(Video response) {
                                 Log.i("response:  ", response.toString());

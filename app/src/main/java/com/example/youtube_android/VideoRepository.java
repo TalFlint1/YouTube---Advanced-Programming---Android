@@ -1,197 +1,215 @@
 package com.example.youtube_android;
 
-import android.content.SharedPreferences;
+import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-
-import java.util.List;
-
+import androidx.lifecycle.LiveData;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VideoRepository {
     private ApiService apiService;
-    private SharedPreferences sharedPreferences;
+    private VideoDao videoDao;
+    private Context context;
 
-    public VideoRepository() {
+    public VideoRepository(Context context) {
         apiService = RetrofitClient.getApiService();
-//        sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        VideoRoomDatabase db = VideoRoomDatabase.getDatabase(context);
+        videoDao = db.videoDao();
+        this.context = context;
     }
 
-    // Method to perform login operation
+    // Method to fetch all videos from API and store them in Room database
     public void getAllVideos(final GetVideosCallback callback) {
         apiService.getVideos().enqueue(new Callback<List<Video>>() {
-
-
             @Override
             public void onResponse(Call<List<Video>> call, Response<List<Video>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    // Save user data to SharedPreferences
-                    // Log the SharedPreferences values
-                   // displaySharedPreferences();
-                    // Pass the login response to ViewModel
-                    callback.onGetVideosResponse(response.body());
+                    // Save videos to Room database
+                    List<Video> videoList = response.body();
+                    VideoRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        for (Video video : videoList) {
+                            VideoEntity videoEntity = new VideoEntity();
+                            videoEntity.setId(String.valueOf(video.getId()));
+                            videoEntity.setTitle(video.getTitle());
+                            videoEntity.setUsername(video.getUsername());
+                            videoEntity.setViews(Integer.parseInt(video.getViews()));
+                            videoEntity.setTime(video.getTime());
+                            videoEntity.setVideoUrl(video.getVideoUrl());
+                            videoDao.insert(videoEntity);
+                        }
+                        // Pass the video list response to ViewModel
+                        callback.onGetVideosResponse(videoList);
+                    });
                 } else if (response.code() == 401) {
                     String errorMessage = "Unauthorized access. Please check your credentials.";
-                    Log.e("UserRepository", errorMessage);
+                    Log.e("VideoRepository", errorMessage);
                     callback.onGetVideosError(errorMessage);
                 } else {
                     // Handle other HTTP error codes
-                    String errorMessage = "Failed to login: " + response.message();
-                    Log.e("UserRepository", errorMessage);
+                    String errorMessage = "Failed to fetch videos: " + response.message();
+                    Log.e("VideoRepository", errorMessage);
                     callback.onGetVideosError(errorMessage);
                 }
             }
-
+            private void runOnUiThread(Runnable action) {
+                new Handler(Looper.getMainLooper()).post(action);
+            }public List<Video> parseVideoEntitiesToVideos(List<VideoEntity> videoEntities) {
+                List<Video> videos = new ArrayList<>();
+                for (VideoEntity entity : videoEntities) {
+                    Video video = new Video(
+                            entity.getTitle(),
+                            entity.getUsername(),
+                            String.valueOf(entity.getViews()),
+                            entity.getTime(),
+                            entity.getVideoUrl(),
+                            0, // Default like count, update if necessary
+                            Integer.parseInt(entity.getId()) // Assuming ID is stored as a string in the entity
+                    );
+                    videos.add(video);
+                }
+                return videos;
+            }
             @Override
             public void onFailure(Call<List<Video>> call, Throwable t) {
                 String errorMessage = "Network error. Please try again later.";
-                Log.e("UserRepository", errorMessage, t);
+                Log.e("VideoRepository", errorMessage, t);
+                Log.e("VideoRepository", errorMessage, t);
                 callback.onGetVideosError(errorMessage);
+                UserRoomDatabase.databaseWriteExecutor.execute(() -> {
+                    List<VideoEntity> videos = videoDao.getAllVideos();
+                    if (videos != null) {
+//                        // Offline login successful
+//                        LoginResponse offlineLoginResponse = new LoginResponse(userEntity.getToken(), userEntity.getProfilePictureUrl());
+                        runOnUiThread(() -> callback.onGetVideosResponse(parseVideoEntitiesToVideos(videos)));
+                    }
+                   else {
+                        // Offline login failed
+                       String msg = "Login failed. Please try again.";
+                       runOnUiThread(() -> callback.onGetVideosError(errorMessage));
+                    }
+                });
             }
-
-
         });
     }
 
-    // Method to perform register operation
-    public void UpdateVideo(Video video, final UpdateVideosCallback callback) {
-        Log.e("here in update func",".");
-        Log.e("here in update func",video.getUsername());
-        Log.e("here in update func", String.valueOf(video.getId()));
-        apiService.updateVideo(video.getUsername(), String.valueOf(video.getId()),video).enqueue(new Callback<Video>()
-        {
 
+
+    // Method to update a video in API and Room
+    public void updateVideo(Video video, final UpdateVideosCallback callback) {
+        apiService.updateVideo(video.getUsername(), String.valueOf(video.getId()), video).enqueue(new Callback<Video>() {
             @Override
             public void onResponse(Call<Video> call, Response<Video> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.e("here in onResponse",".");
-                    callback.onUpdateVideosResponse(response.body());
+                    Video updatedVideo = response.body();
+                    VideoEntity videoEntity = new VideoEntity();
+                    videoEntity.setId(String.valueOf(updatedVideo.getId()));
+                    videoEntity.setTitle(updatedVideo.getTitle());
+                    videoEntity.setUsername(updatedVideo.getUsername());
+                    videoEntity.setViews(Integer.parseInt(video.getViews()));
+                    videoEntity.setTime(updatedVideo.getTime());
+                    videoEntity.setVideoUrl(updatedVideo.getVideoUrl());
+
+                    VideoRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        videoDao.updateVideo(videoEntity.getId(),videoEntity.getTitle(),videoEntity.getUsername()
+                        ,videoEntity.getViews(),videoEntity.getTime(),videoEntity.getVideoUrl());
+                        callback.onUpdateVideosResponse(updatedVideo);
+                    });
                 } else if (response.code() == 401) {
                     String errorMessage = "Unauthorized access. Please check your credentials.";
-                    Log.e("UserRepository", errorMessage);
+                    Log.e("VideoRepository", errorMessage);
                     callback.onUpdateVideosError(errorMessage);
                 } else {
                     // Handle other HTTP error codes
-                    String errorMessage = "Failed to login: " + response.message();
-                    Log.e("UserRepository", errorMessage);
+                    String errorMessage = "Failed to update video: " + response.message();
+                    Log.e("VideoRepository", errorMessage);
                     callback.onUpdateVideosError(errorMessage);
                 }
-
             }
 
             @Override
             public void onFailure(Call<Video> call, Throwable t) {
-                Log.e("here in onFailure",".");
-
                 String errorMessage = "Network error. Please try again later.";
-                Log.e("UserRepository", errorMessage, t);
+                Log.e("VideoRepository", errorMessage, t);
                 callback.onUpdateVideosError(errorMessage);
             }
         });
     }
 
-    public void GetVideo(Video video, final GetVideoCallback callback) {
-        Log.e("here in update func",".");
-        Log.e("here in update func",video.getUsername());
-        Log.e("here in update func", String.valueOf(video.getId()));
-        apiService.getVideo(video.getUsername(), String.valueOf(video.getId())).enqueue(new Callback<Video>()
-        {
-
+    // Method to get a single video from API
+    public void getVideo(Video video, final GetVideoCallback callback) {
+        apiService.getVideo(video.getUsername(), String.valueOf(video.getId())).enqueue(new Callback<Video>() {
             @Override
             public void onResponse(Call<Video> call, Response<Video> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.e("here in onResponse",".");
                     callback.onGetVideoResponse(response.body());
                 } else if (response.code() == 401) {
                     String errorMessage = "Unauthorized access. Please check your credentials.";
-                    Log.e("UserRepository", errorMessage);
+                    Log.e("VideoRepository", errorMessage);
                     callback.onGetVideoError(errorMessage);
                 } else {
                     // Handle other HTTP error codes
-                    String errorMessage = "Failed to login1: " + response.message();
-                    Log.e("UserRepository", errorMessage);
+                    String errorMessage = "Failed to fetch video: " + response.message();
+                    Log.e("VideoRepository", errorMessage);
                     callback.onGetVideoError(errorMessage);
                 }
             }
 
             @Override
             public void onFailure(Call<Video> call, Throwable t) {
-                Log.e("here in onFailure",".");
-
                 String errorMessage = "Network error. Please try again later.";
-                Log.e("UserRepository", errorMessage, t);
+                Log.e("VideoRepository", errorMessage, t);
                 callback.onGetVideoError(errorMessage);
             }
         });
     }
 
-
-    public void CreateVideo(Video video, final CreateVideosCallback callback) {
-        Log.e("here in create func",".");
-        Log.e("here in create func",video.getUsername());
-        Log.e("here in create func", String.valueOf(video.getId()));
-        apiService.createVideo(video.getUsername(), video).enqueue(new Callback<Video>()
-        {
-
+    // Method to create a new video in API and Room
+    public void createVideo(Video video, final CreateVideosCallback callback) {
+        apiService.createVideo(video.getUsername(), video).enqueue(new Callback<Video>() {
             @Override
             public void onResponse(Call<Video> call, Response<Video> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    Log.e("here in onResponse",".");
-                    callback.onCreateVideosResponse(response.body());
+                    Video createdVideo = response.body();
+                    VideoEntity videoEntity = new VideoEntity();
+                     videoEntity.setId(String.valueOf(createdVideo.getId()));
+                    videoEntity.setTitle(createdVideo.getTitle());
+                    videoEntity.setUsername(createdVideo.getUsername());
+                    videoEntity.setViews(Integer.parseInt(createdVideo.getViews()));
+                    videoEntity.setTime(createdVideo.getTime());
+                    videoEntity.setVideoUrl(createdVideo.getVideoUrl());
+
+                    VideoRoomDatabase.databaseWriteExecutor.execute(() -> {
+                        videoDao.insert(videoEntity);
+                        callback.onCreateVideosResponse(createdVideo);
+                    });
                 } else if (response.code() == 401) {
                     String errorMessage = "Unauthorized access. Please check your credentials.";
-                    Log.e("UserRepository", errorMessage);
+                    Log.e("VideoRepository", errorMessage);
                     callback.onCreateVideosError(errorMessage);
                 } else {
                     // Handle other HTTP error codes
-                    String errorMessage = "Failed to login1: " + response.message();
-                    Log.e("UserRepository", errorMessage);
+                    String errorMessage = "Failed to create video: " + response.message();
+                    Log.e("VideoRepository", errorMessage);
                     callback.onCreateVideosError(errorMessage);
                 }
             }
 
             @Override
             public void onFailure(Call<Video> call, Throwable t) {
-                Log.e("here in onFailure",".");
-
                 String errorMessage = "Network error. Please try again later.";
-                Log.e("UserRepository", errorMessage, t);
+                Log.e("VideoRepository", errorMessage, t);
                 callback.onCreateVideosError(errorMessage);
             }
         });
     }
 
-
-
-    // Method to clear user data from SharedPreferences
-    private void clearUserData() {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.apply();
-    }
-
-    // Method to save token to SharedPreferences
-    public void saveToken(String token) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("jwtToken", token);
-        editor.apply();
-    }
-
-    // Method to save profile picture URL to SharedPreferences
-    public void saveProfilePicture(String profilePictureUrl) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("profilePictureUrl", profilePictureUrl);
-        editor.apply();
-    }
-
-    // Method to display SharedPreferences values for debugging
-    private void displaySharedPreferences() {
-        Log.d("SharedPreferences", "Token: " + sharedPreferences.getString("jwtToken", ""));
-        Log.d("SharedPreferences", "Profile Picture URL: " + sharedPreferences.getString("profilePictureUrl", ""));
-    }
-
-    // Interface to handle login callback
+    // Callback interfaces
     public interface GetVideosCallback {
         void onGetVideosResponse(List<Video> response);
         void onGetVideosError(String errorMessage);
@@ -201,24 +219,14 @@ public class VideoRepository {
         void onUpdateVideosResponse(Video response);
         void onUpdateVideosError(String errorMessage);
     }
+
     public interface CreateVideosCallback {
         void onCreateVideosResponse(Video response);
         void onCreateVideosError(String errorMessage);
     }
+
     public interface GetVideoCallback {
         void onGetVideoResponse(Video response);
         void onGetVideoError(String errorMessage);
-    }
-
-    // Interface to handle register callback
-    public interface RegisterCallback {
-        void onRegisterResponse(RegisterResponse response);
-        void onRegisterError(String errorMessage);
-    }
-
-    // Interface to handle delete user callback
-    public interface DeleteUserCallback {
-        void onDeleteUserResponse();
-        void onDeleteUserError(String errorMessage);
     }
 }

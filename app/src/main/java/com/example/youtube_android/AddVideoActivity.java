@@ -51,7 +51,7 @@ public class AddVideoActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_video);
-        repository = new VideoRepository();
+        repository = new VideoRepository(this);
         userRepository = new UserRepository(this);
         userViewModel = new ViewModelProvider(this).get(UserViewModel.class);
         // Find the close button
@@ -94,7 +94,7 @@ public class AddVideoActivity extends AppCompatActivity {
                         throw new RuntimeException(e);
                     }
                     Toast.makeText(AddVideoActivity.this, "Video added successfully!", Toast.LENGTH_SHORT).show();
-                    repository.CreateVideo(newItem, new VideoRepository.CreateVideosCallback() {
+                    repository.createVideo(newItem, new VideoRepository.CreateVideosCallback() {
                         @Override
                         public void onCreateVideosResponse(Video response) {
                             Log.i("ok","ok");

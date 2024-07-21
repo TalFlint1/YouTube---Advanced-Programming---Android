@@ -26,7 +26,7 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     public CommentsAdapter( List<String> commentsList, Video video) {
 //        this.context = context;
         this.commentsList = commentsList;
-        this.repository = new VideoRepository();
+        this.repository = new VideoRepository(context);
         this.video = video;
     }
 
@@ -58,12 +58,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     }
 
     private void updateCommentInRepository(int position, String newComment) {
-        repository.GetVideo(video, new VideoRepository.GetVideoCallback() {
+        repository.getVideo(video, new VideoRepository.GetVideoCallback() {
             @Override
             public void onGetVideoResponse(Video response) {
                 video = response;
                 video.updateComment(position, newComment);  // Assuming you have an updateComment method in Video class
-                repository.UpdateVideo(video, new VideoRepository.UpdateVideosCallback() {
+                repository.updateVideo(video, new VideoRepository.UpdateVideosCallback() {
                     @Override
                     public void onUpdateVideosResponse(Video response) {
                         Log.i("response:  ", response.toString());
@@ -84,12 +84,12 @@ public class CommentsAdapter extends RecyclerView.Adapter<CommentsAdapter.Commen
     }
 
     private void removeCommentFromRepository(int position) {
-        repository.GetVideo(video, new VideoRepository.GetVideoCallback() {
+        repository.getVideo(video, new VideoRepository.GetVideoCallback() {
             @Override
             public void onGetVideoResponse(Video response) {
                 video = response;
                 video.removeComment(position);
-                repository.UpdateVideo(video, new VideoRepository.UpdateVideosCallback() {
+                repository.updateVideo(video, new VideoRepository.UpdateVideosCallback() {
                     @Override
                     public void onUpdateVideosResponse(Video response) {
                         Log.i("response:  ", response.toString());
